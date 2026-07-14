@@ -108,10 +108,10 @@ export default function Preview({ content, mediaUrls, selectedPlatforms }) {
       {activeTab === 'twitter' && (
         <div className="mock-card mock-twitter">
           <div className="tweet-header">
-            <div className="tweet-avatar">AU</div>
+            <div className="tweet-avatar">ES</div>
             <div className="tweet-user-info">
-              <span className="tweet-name">Academic Student</span>
-              <span className="tweet-handle">@student_dev · 2h</span>
+              <span className="tweet-name">Eshaan Sharma</span>
+              <span className="tweet-handle">@eshaansharma · 2h</span>
             </div>
             <MoreHorizontal size={16} style={{ marginLeft: 'auto', color: '#536471' }} />
           </div>
@@ -131,9 +131,9 @@ export default function Preview({ content, mediaUrls, selectedPlatforms }) {
       {activeTab === 'facebook' && (
         <div className="mock-card mock-facebook">
           <div className="fb-header">
-            <div className="fb-avatar">AU</div>
+            <div className="fb-avatar">ES</div>
             <div className="fb-user-details">
-              <span className="fb-username">Academic Student</span>
+              <span className="fb-username">Eshaan Sharma</span>
               <span className="fb-time">Just now · 🌐</span>
             </div>
             <MoreHorizontal size={18} style={{ marginLeft: 'auto', color: '#65676b' }} />
@@ -156,7 +156,7 @@ export default function Preview({ content, mediaUrls, selectedPlatforms }) {
             <div className="ig-avatar">
               <div className="ig-avatar-inner" />
             </div>
-            <span className="ig-username">student_developer</span>
+            <span className="ig-username">eshaan_sharma</span>
             <MoreHorizontal size={18} style={{ marginLeft: 'auto', color: '#262626' }} />
           </div>
           
@@ -183,7 +183,7 @@ export default function Preview({ content, mediaUrls, selectedPlatforms }) {
           </div>
 
           <div className="ig-caption-box">
-            <span className="ig-caption-user">student_developer</span>
+            <span className="ig-caption-user">eshaan_sharma</span>
             <span className="ig-caption-text">
               {content || <span style={{ color: '#8e8e8e', fontStyle: 'italic' }}>Draft content will appear here</span>}
             </span>
@@ -194,10 +194,10 @@ export default function Preview({ content, mediaUrls, selectedPlatforms }) {
       {activeTab === 'linkedin' && (
         <div className="mock-card mock-linkedin">
           <div className="li-header">
-            <div className="li-avatar">AU</div>
+            <div className="li-avatar">ES</div>
             <div className="li-user-details">
-              <span className="li-username">Academic Student</span>
-              <span className="li-headline">Full Stack Engineering Student</span>
+              <span className="li-username">Eshaan Sharma</span>
+              <span className="li-headline">Full Stack Developer</span>
               <span className="li-time">1h · 🌐</span>
             </div>
             <MoreHorizontal size={18} style={{ marginLeft: 'auto', color: 'rgba(0,0,0,0.6)' }} />

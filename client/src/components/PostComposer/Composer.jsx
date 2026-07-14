@@ -193,8 +193,8 @@ export default function Composer() {
       {/* Header */}
       <div className="dashboard-header">
         <div className="dashboard-title">
-          <h1>Experiment 1: Post Composer</h1>
-          <p>Design a dynamic social media composer with robust validation and multi-platform support.</p>
+          <h1>Multi-Platform Post Composer</h1>
+          <p>Compose, validate, and preview posts dynamically across social networks.</p>
         </div>
       </div>
 
@@ -237,7 +237,7 @@ export default function Composer() {
           <Layers size={18} style={{ color: 'var(--accent-primary)' }} /> Database Publish Registry
         </h3>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-          Loaded drafts and compiled posts saved in server persistence store (JSON DB).
+          Loaded drafts and posts successfully saved to MongoDB Atlas database.
         </p>
 
         {history.length === 0 ? (

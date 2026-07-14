@@ -237,7 +237,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Main Content Area */
 .main-content {
   flex-grow: 1;
-  margin-left: 280px;
+  margin-left: 0;
   padding: 2.5rem 3rem;
   min-height: 100vh;
 }
@@ -1215,7 +1215,7 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
   }
   .main-content {
-    margin-left: 80px;
+    margin-left: 0;
     padding: 2rem;
   }
   .logo-container {
