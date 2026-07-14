@@ -1,0 +1,21 @@
+# Dependency directories
+node_modules/
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+.vercel
+
+# Local JSON database (deprecated)
+server/data/
+
+# OS metadata
+.DS_Store
+Thumbs.db
