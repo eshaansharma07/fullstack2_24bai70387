@@ -28,6 +28,20 @@ Objectives:
 
 COs mapped: CO2 - BT2, CO3 - BT3.
 
+### Experiment 3: Redux Toolkit State Management
+
+Aim: Design and implement centralized state management using Redux Toolkit for posts, drafts, and platform-related data.
+
+Objectives:
+
+- Understand global state management through a single Redux store.
+- Implement Redux Toolkit and React-Redux for scalable state handling.
+- Store draft and published-post collections in normalized `ids` + `entities` structures.
+- Manage asynchronous workflows through Redux async thunks.
+- Reduce prop drilling by connecting the composer workflow to Redux selectors and dispatch actions.
+
+COs mapped: CO1 - BT1, CO2 - BT2, CO3 - BT3.
+
 ## Features
 
 - Save the current composer state as a local draft.
@@ -36,6 +50,7 @@ COs mapped: CO2 - BT2, CO3 - BT3.
 - Edit/load local drafts asynchronously using mock API-style delays.
 - Delete local drafts from browser storage.
 - Publish validated posts to the backend database separately from local draft saving.
+- Manage composer, draft, published post, and selected platform state through Redux Toolkit.
 - Use a bold green, white, and black frontend direction inspired by maximalism, brutalism, and spatial layout.
 
 ## Validation Rules
@@ -52,6 +67,7 @@ Validation runs on the backend before saving. The frontend also includes fallbac
 ## Tech Stack
 
 - Frontend: React, Vite, lucide-react
+- State management: Redux Toolkit, React-Redux
 - Backend: Express, Node.js
 - Database: MongoDB Atlas with Mongoose
 - Deployment: Vercel
@@ -65,6 +81,7 @@ Validation runs on the backend before saving. The frontend also includes fallbac
 |   `-- src/
 |       `-- components/
 |           `-- PostComposer/
+|       `-- store/          # Redux Toolkit store and slices
 |-- server/                 # Express API and MongoDB helpers
 |   `-- src/
 |-- package.json            # Root workspace scripts
@@ -108,6 +125,33 @@ npm run lint --workspace=client
 npm run dev --workspace=server
 npm start --workspace=server
 ```
+
+## Redux State Structure
+
+Experiment 3 introduces two main Redux slices:
+
+- `posts`: composer fields, local drafts, published posts, draft loading status, and publish status.
+- `platforms`: normalized platform rule data and selected platform ids.
+
+The `posts` slice stores draft and published post collections in a normalized form:
+
+```js
+{
+  ids: ["post-id-1", "post-id-2"],
+  entities: {
+    "post-id-1": { id: "post-id-1", title: "Draft title" }
+  }
+}
+```
+
+Async thunks are used for:
+
+- Loading local drafts from `localStorage`.
+- Saving and updating local drafts with mock latency.
+- Loading a draft into the composer.
+- Deleting local drafts.
+- Fetching published posts from the API.
+- Publishing the current post to MongoDB through the backend API.
 
 ## API Endpoints
 

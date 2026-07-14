@@ -13,6 +13,7 @@ export default function Editor({
   onSaveLocalDraft,
   onClear,
   isDraftSaving,
+  isPublishing,
   activeDraftId
 }) {
   const maxCharLimit = selectedPlatforms.reduce((min, platform) => {
@@ -54,7 +55,7 @@ export default function Editor({
     setContent(content + space + tag);
   };
 
-  const hashtags = ['#FullStack', '#Coding', '#Experiment1', '#WebDev', '#ReactJS'];
+  const hashtags = ['#Launch', '#Growth', '#Design', '#WebDev', '#Social'];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -65,7 +66,7 @@ export default function Editor({
           id="post-title"
           type="text"
           className="form-input"
-          placeholder="e.g. Experiment 1 Release Announcement"
+          placeholder="e.g. Product launch update"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -164,10 +165,11 @@ export default function Editor({
           type="button"
           className="exp-action btn-primary"
           onClick={onSave}
+          disabled={isPublishing}
           style={{ flexGrow: 1 }}
         >
           <Database size={16} />
-          Publish to Database
+          {isPublishing ? 'Publishing' : 'Publish to Database'}
         </button>
         <button
           type="button"

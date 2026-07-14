@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import PlatformTab from './PlatformTab';
 import Editor from './Editor';
 import Validation from './Validation';
@@ -13,51 +14,48 @@ import {
   Layers,
   Pencil,
   Save,
-  Sparkles,
   Trash2,
   X,
   XCircle
 } from 'lucide-react';
-
-const PLATFORM_RULES = {
-  twitter: { maxChars: 280, maxMedia: 4, mediaRequired: false, name: 'X (Twitter)' },
-  facebook: { maxChars: 63206, maxMedia: 10, mediaRequired: false, name: 'Facebook' },
-  instagram: { maxChars: 2200, maxMedia: 10, mediaRequired: true, name: 'Instagram' },
-  linkedin: { maxChars: 3000, maxMedia: 9, mediaRequired: false, name: 'LinkedIn' },
-};
+import {
+  clearComposer,
+  deleteLocalDraft,
+  fetchPublishedPosts,
+  loadDraftIntoComposer,
+  loadLocalDrafts,
+  publishCurrentPost,
+  saveLocalDraft,
+  selectComposer,
+  selectLocalDrafts,
+  selectPublishedPosts,
+  setComposerField
+} from '../../store/postsSlice';
+import {
+  selectPlatformRules,
+  selectSelectedPlatformIds,
+  setSelectedPlatforms,
+  togglePlatform
+} from '../../store/platformsSlice';
 
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:5001/api';
-const DRAFT_STORAGE_KEY = 'socialComposer.localDrafts.v1';
-
-const wait = (ms = 350) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const createDraftSnapshot = ({ id, title, content, mediaUrls, platforms }) => {
-  const now = new Date().toISOString();
-
-  return {
-    id: id || crypto.randomUUID(),
-    title: title?.trim() || 'Untitled Local Draft',
-    content,
-    mediaUrls,
-    platforms,
-    updatedAt: now,
-    createdAt: now,
-  };
-};
 
 export default function Composer() {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [mediaUrls, setMediaUrls] = useState([]);
-  const [selectedPlatforms, setSelectedPlatforms] = useState(['twitter']);
+  const dispatch = useDispatch();
+  const composer = useSelector(selectComposer);
+  const localDrafts = useSelector(selectLocalDrafts);
+  const history = useSelector(selectPublishedPosts);
+  const selectedPlatforms = useSelector(selectSelectedPlatformIds);
+  const platformRules = useSelector(selectPlatformRules);
+  const draftLoadingId = useSelector((state) => state.posts.localDrafts.loadingId);
+  const localDraftStatus = useSelector((state) => state.posts.localDrafts.status);
+  const publishStatus = useSelector((state) => state.posts.publishStatus);
+  const { title, content, mediaUrls, activeDraftId } = composer;
   const [validationData, setValidationData] = useState({});
-  const [history, setHistory] = useState([]);
-  const [localDrafts, setLocalDrafts] = useState([]);
-  const [activeDraftId, setActiveDraftId] = useState(null);
-  const [draftLoadingId, setDraftLoadingId] = useState(null);
-  const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [activeModalPost, setActiveModalPost] = useState(null);
+  const isDraftSaving = localDraftStatus === 'saving';
+  const isPublishing = publishStatus === 'loading';
 
   // Helper: Trigger toast notification
   const showToast = (message, isError = false) => {
@@ -65,57 +63,28 @@ export default function Composer() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Toggle platform selection
-  const togglePlatform = (platformId) => {
-    if (selectedPlatforms.includes(platformId)) {
-      setSelectedPlatforms(selectedPlatforms.filter((p) => p !== platformId));
-    } else {
-      setSelectedPlatforms([...selectedPlatforms, platformId]);
-    }
-  };
-
-  // Load publication/draft history
-  const fetchHistory = useCallback(async () => {
-    try {
-      const res = await fetch(`${API_BASE}/posts/history`);
-      if (res.ok) {
-        const data = await res.json();
-        setHistory(data);
-      }
-    } catch (err) {
-      console.error('Failed to load history from backend:', err);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+    dispatch(fetchPublishedPosts());
+    dispatch(loadLocalDrafts())
+      .unwrap()
+      .catch((message) => showToast(message, true));
+  }, [dispatch]);
 
-  useEffect(() => {
-    try {
-      const savedDrafts = JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || '[]');
-      if (Array.isArray(savedDrafts)) {
-        setLocalDrafts(savedDrafts);
-      }
-    } catch {
-      setLocalDrafts([]);
-      showToast('Local draft storage could not be read. Starting fresh.', true);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(localDrafts));
-  }, [localDrafts]);
+  const setTitle = (value) => dispatch(setComposerField({ field: 'title', value }));
+  const setContent = (value) => dispatch(setComposerField({ field: 'content', value }));
+  const setMediaUrls = (value) => dispatch(setComposerField({ field: 'mediaUrls', value }));
 
   // Robust client-side fallback validation when the server is offline.
   const runFallbackValidation = useCallback(() => {
     const fallbackResults = {};
 
     selectedPlatforms.forEach((platform) => {
-      const rule = PLATFORM_RULES[platform];
+      const rule = platformRules[platform];
       const errors = [];
       const warnings = [];
       const count = content ? content.length : 0;
+
+      if (!rule) return;
 
       if (count > rule.maxChars) {
         errors.push(`Character count (${count.toLocaleString()}) exceeds the limit of ${rule.maxChars.toLocaleString()} for ${rule.name}.`);
@@ -144,7 +113,7 @@ export default function Composer() {
     });
 
     setValidationData(fallbackResults);
-  }, [content, mediaUrls.length, selectedPlatforms]);
+  }, [content, mediaUrls.length, platformRules, selectedPlatforms]);
 
   // Real-time validation trigger (debounced)
   useEffect(() => {
@@ -181,71 +150,30 @@ export default function Composer() {
   }, [content, mediaUrls.length, selectedPlatforms, runFallbackValidation]);
 
   const handleSaveLocalDraft = async () => {
-    if (!content.trim() && mediaUrls.length === 0 && !title.trim()) {
-      showToast('Add content, media, or a title before saving a local draft.', true);
-      return;
-    }
-
-    setIsDraftSaving(true);
-
     try {
-      await wait();
-
-      const draft = createDraftSnapshot({
-        id: activeDraftId,
-        title,
-        content,
-        mediaUrls,
-        platforms: selectedPlatforms,
-      });
-
-      setLocalDrafts((drafts) => {
-        const existingDraft = drafts.find((item) => item.id === draft.id);
-        if (existingDraft) {
-          return drafts.map((item) => (
-            item.id === draft.id
-              ? { ...draft, createdAt: item.createdAt }
-              : item
-          ));
-        }
-
-        return [draft, ...drafts];
-      });
-      setActiveDraftId(draft.id);
-      showToast(activeDraftId ? 'Local draft updated in browser storage.' : 'Local draft saved in browser storage.');
-    } finally {
-      setIsDraftSaving(false);
+      const result = await dispatch(saveLocalDraft()).unwrap();
+      showToast(result.isUpdate ? 'Local draft updated in browser storage.' : 'Local draft saved in browser storage.');
+    } catch (message) {
+      showToast(message, true);
     }
   };
 
   const handleLoadLocalDraft = async (draft) => {
-    setDraftLoadingId(draft.id);
-
     try {
-      await wait(250);
-      setTitle(draft.title);
-      setContent(draft.content);
-      setMediaUrls(draft.mediaUrls || []);
-      setSelectedPlatforms(draft.platforms?.length ? draft.platforms : ['twitter']);
-      setActiveDraftId(draft.id);
+      const loadedDraft = await dispatch(loadDraftIntoComposer(draft.id)).unwrap();
+      dispatch(setSelectedPlatforms(loadedDraft.platforms));
       showToast('Local draft loaded into composer.');
-    } finally {
-      setDraftLoadingId(null);
+    } catch (message) {
+      showToast(message, true);
     }
   };
 
   const handleDeleteLocalDraft = async (draftId) => {
-    setDraftLoadingId(draftId);
-
     try {
-      await wait(250);
-      setLocalDrafts((drafts) => drafts.filter((draft) => draft.id !== draftId));
-      if (activeDraftId === draftId) {
-        setActiveDraftId(null);
-      }
+      await dispatch(deleteLocalDraft(draftId)).unwrap();
       showToast('Local draft deleted.');
-    } finally {
-      setDraftLoadingId(null);
+    } catch (message) {
+      showToast(message || 'Unable to delete local draft.', true);
     }
   };
 
@@ -270,37 +198,15 @@ export default function Composer() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/posts/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title || 'Post Draft',
-          content,
-          mediaCount: mediaUrls.length,
-          mediaUrls,
-          platforms: selectedPlatforms,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        showToast('Post draft successfully saved to persistence database!');
-        handleClear();
-        fetchHistory(); // Refresh history list
-      } else {
-        showToast(data.error || 'Failed to publish draft.', true);
-      }
-    } catch {
-      showToast('Server connection failed. Unable to save draft.', true);
+      await dispatch(publishCurrentPost()).unwrap();
+      showToast('Post draft successfully saved to persistence database!');
+    } catch (message) {
+      showToast(message, true);
     }
   };
 
   const handleClear = () => {
-    setTitle('');
-    setContent('');
-    setMediaUrls([]);
-    setActiveDraftId(null);
+    dispatch(clearComposer());
   };
 
   const activeDraft = localDrafts.find((draft) => draft.id === activeDraftId);
@@ -318,9 +224,8 @@ export default function Composer() {
       {/* Header */}
       <div className="dashboard-header">
         <div className="dashboard-title">
-          <span className="experiment-kicker">Experiment 2 / Frontend Draft Management</span>
-          <h1>SocialComposer Draft Studio</h1>
-          <p>Build, save, edit, delete, validate, and publish posts through a frontend-first workflow.</p>
+          <h1>SocialComposer</h1>
+          <p>Draft, preview, save, and publish social posts from one focused workspace.</p>
         </div>
         <div className="dashboard-stats-strip" aria-label="Draft workflow statistics">
           <div>
@@ -334,14 +239,6 @@ export default function Composer() {
         </div>
       </div>
 
-      <div className="experiment-banner">
-        <div>
-          <span>CO2 - BT2 / CO3 - BT3</span>
-          <strong>Frontend CRUD with mock async APIs and localStorage persistence</strong>
-        </div>
-        <Sparkles size={28} />
-      </div>
-
       <div className="composer-grid">
         {/* Workspace Column */}
         <div className="composer-workspace">
@@ -353,7 +250,7 @@ export default function Composer() {
           )}
           <PlatformTab
             selectedPlatforms={selectedPlatforms}
-            togglePlatform={togglePlatform}
+            togglePlatform={(platformId) => dispatch(togglePlatform(platformId))}
           />
           <Editor
             title={title}
@@ -367,6 +264,7 @@ export default function Composer() {
             onSaveLocalDraft={handleSaveLocalDraft}
             onClear={handleClear}
             isDraftSaving={isDraftSaving}
+            isPublishing={isPublishing}
             activeDraftId={activeDraftId}
           />
           <Validation
@@ -387,13 +285,12 @@ export default function Composer() {
       <section className="draft-manager-section">
         <div className="draft-manager-header">
           <div>
-            <span className="experiment-kicker">Frontend State + localStorage</span>
             <h3 className="section-title" style={{ margin: 0 }}>
-              <Save size={18} /> Local Draft Control Room
+              <Save size={18} /> Drafts
             </h3>
           </div>
           <p>
-            Drafts below are managed entirely in the browser with simulated async save, load, update, and delete flows.
+            Save unfinished posts, reopen them for editing, or delete drafts you no longer need.
           </p>
         </div>
 

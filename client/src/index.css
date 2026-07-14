@@ -397,7 +397,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
 }
 
-/* Experiment Selector Hub Grid */
+/* Feature selector grid */
 .experiment-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -506,7 +506,7 @@ h1, h2, h3, h4, h5, h6 {
   cursor: not-allowed;
 }
 
-/* --- Experiment 1 View: Composer Layout --- */
+/* --- Composer Layout --- */
 .composer-grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
