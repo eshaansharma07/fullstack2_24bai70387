@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image as ImageIcon, Trash2, Hash } from 'lucide-react';
+import { Hash, Image as ImageIcon, Trash2, X } from 'lucide-react';
 
 export default function Editor({
   title,
@@ -10,8 +10,7 @@ export default function Editor({
   setMediaUrls,
   selectedPlatforms,
   onSave,
-  onClear,
-  validationData
+  onClear
 }) {
   const maxCharLimit = selectedPlatforms.reduce((min, platform) => {
     const limits = { twitter: 280, facebook: 63206, instagram: 2200, linkedin: 3000 };
@@ -134,9 +133,10 @@ export default function Editor({
                   <button
                     type="button"
                     className="remove-media-btn"
+                    aria-label={`Remove media attachment ${idx + 1}`}
                     onClick={() => removeMedia(idx)}
                   >
-                    ×
+                    <X size={12} />
                   </button>
                 </div>
               ))}

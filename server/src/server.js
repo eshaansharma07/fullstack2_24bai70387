@@ -8,16 +8,13 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 import express from 'express';
 import cors from 'cors';
-import { connectDb, getPosts, savePost } from './db.js';
+import { getPosts, savePost } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
 app.use(cors());
 app.use(express.json());
-
-// Connect to MongoDB Atlas
-connectDb();
 
 const PLATFORM_RULES = {
   twitter: {
@@ -152,7 +149,12 @@ app.post('/api/posts/save', async (req, res) => {
       post: saved
     });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to save post to database.' });
+    const isMissingMongoUri = error.message.includes('MONGODB_URI');
+    res.status(isMissingMongoUri ? 500 : 503).json({
+      error: isMissingMongoUri
+        ? 'Database is not configured. Add MONGODB_URI to the server environment.'
+        : 'Database is unavailable. Please try again shortly.'
+    });
   }
 });
 
@@ -162,7 +164,12 @@ app.get('/api/posts/history', async (req, res) => {
     const posts = await getPosts();
     res.json(posts);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch post history.' });
+    const isMissingMongoUri = error.message.includes('MONGODB_URI');
+    res.status(isMissingMongoUri ? 500 : 503).json({
+      error: isMissingMongoUri
+        ? 'Database is not configured. Add MONGODB_URI to the server environment.'
+        : 'Failed to fetch post history.'
+    });
   }
 });
 

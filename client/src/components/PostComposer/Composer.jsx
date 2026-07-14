@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PlatformTab from './PlatformTab';
 import Editor from './Editor';
 import Validation from './Validation';
 import Preview from './Preview';
-import { Calendar, Layers, CheckCircle } from 'lucide-react';
+import { Calendar, CheckCircle, Eye, Image as ImageIcon, Layers, X, XCircle } from 'lucide-react';
+
+const PLATFORM_RULES = {
+  twitter: { maxChars: 280, maxMedia: 4, mediaRequired: false, name: 'X (Twitter)' },
+  facebook: { maxChars: 63206, maxMedia: 10, mediaRequired: false, name: 'Facebook' },
+  instagram: { maxChars: 2200, maxMedia: 10, mediaRequired: true, name: 'Instagram' },
+  linkedin: { maxChars: 3000, maxMedia: 9, mediaRequired: false, name: 'LinkedIn' },
+};
+
+const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:5001/api';
 
 export default function Composer() {
   const [title, setTitle] = useState('');
@@ -14,8 +23,6 @@ export default function Composer() {
   const [history, setHistory] = useState([]);
   const [toast, setToast] = useState(null);
   const [activeModalPost, setActiveModalPost] = useState(null);
-
-  const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:5001/api';
 
   // Helper: Trigger toast notification
   const showToast = (message, isError = false) => {
@@ -33,7 +40,7 @@ export default function Composer() {
   };
 
   // Load publication/draft history
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/posts/history`);
       if (res.ok) {
@@ -43,11 +50,50 @@ export default function Composer() {
     } catch (err) {
       console.error('Failed to load history from backend:', err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchHistory();
-  }, []);
+  }, [fetchHistory]);
+
+  // Robust client-side fallback validation when the server is offline.
+  const runFallbackValidation = useCallback(() => {
+    const fallbackResults = {};
+
+    selectedPlatforms.forEach((platform) => {
+      const rule = PLATFORM_RULES[platform];
+      const errors = [];
+      const warnings = [];
+      const count = content ? content.length : 0;
+
+      if (count > rule.maxChars) {
+        errors.push(`Character count (${count.toLocaleString()}) exceeds the limit of ${rule.maxChars.toLocaleString()} for ${rule.name}.`);
+      }
+      if (mediaUrls.length > rule.maxMedia) {
+        errors.push(`Media count (${mediaUrls.length}) exceeds the limit of ${rule.maxMedia} for ${rule.name}.`);
+      }
+      if (rule.mediaRequired && mediaUrls.length === 0) {
+        errors.push(`At least one image or video is required to post on ${rule.name}.`);
+      }
+      if (platform === 'twitter' && count > 240 && count <= 280) {
+        warnings.push('You are close to the limit! Consider shortening your content.');
+      }
+      if (platform === 'instagram' && !content.includes('#')) {
+        warnings.push('Adding hashtags to your Instagram post can improve its visibility.');
+      }
+      if (platform === 'linkedin' && content.length < 50) {
+        warnings.push('LinkedIn posts with longer, insightful content perform better.');
+      }
+
+      fallbackResults[platform] = {
+        isValid: errors.length === 0,
+        errors,
+        warnings,
+      };
+    });
+
+    setValidationData(fallbackResults);
+  }, [content, mediaUrls.length, selectedPlatforms]);
 
   // Real-time validation trigger (debounced)
   useEffect(() => {
@@ -75,58 +121,13 @@ export default function Composer() {
           // If server fails or is offline, perform fallback client-side validation
           runFallbackValidation();
         }
-      } catch (err) {
+      } catch {
         runFallbackValidation();
       }
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [content, mediaUrls, selectedPlatforms]);
-
-  // Robust Client-side Fallback Validation when Server is offline
-  const runFallbackValidation = () => {
-    const fallbackResults = {};
-    const rules = {
-      twitter: { maxChars: 280, maxMedia: 4, mediaRequired: false, name: 'X (Twitter)' },
-      facebook: { maxChars: 63206, maxMedia: 10, mediaRequired: false, name: 'Facebook' },
-      instagram: { maxChars: 2200, maxMedia: 10, mediaRequired: true, name: 'Instagram' },
-      linkedin: { maxChars: 3000, maxMedia: 9, mediaRequired: false, name: 'LinkedIn' },
-    };
-
-    selectedPlatforms.forEach((platform) => {
-      const rule = rules[platform];
-      const errors = [];
-      const warnings = [];
-      const count = content ? content.length : 0;
-
-      if (count > rule.maxChars) {
-        errors.push(`Character count (${count.toLocaleString()}) exceeds the limit of ${rule.maxChars.toLocaleString()} for ${rule.name}.`);
-      }
-      if (mediaUrls.length > rule.maxMedia) {
-        errors.push(`Media count (${mediaUrls.length}) exceeds the limit of ${rule.maxMedia} for ${rule.name}.`);
-      }
-      if (rule.mediaRequired && mediaUrls.length === 0) {
-        errors.push(`At least one image or video is required to post on ${rule.name}.`);
-      }
-      if (platform === 'twitter' && count > 240 && count <= 280) {
-        warnings.push(`You are close to the limit! Consider shortening your content.`);
-      }
-      if (platform === 'instagram' && !content.includes('#')) {
-        warnings.push(`Adding hashtags to your Instagram post can improve its visibility.`);
-      }
-      if (platform === 'linkedin' && content.length < 50) {
-        warnings.push(`LinkedIn posts with longer, insightful content perform better.`);
-      }
-
-      fallbackResults[platform] = {
-        isValid: errors.length === 0,
-        errors,
-        warnings,
-      };
-    });
-
-    setValidationData(fallbackResults);
-  };
+  }, [content, mediaUrls.length, selectedPlatforms, runFallbackValidation]);
 
   // Submit/Save draft handler
   const handleSave = async () => {
@@ -170,7 +171,7 @@ export default function Composer() {
       } else {
         showToast(data.error || 'Failed to publish draft.', true);
       }
-    } catch (err) {
+    } catch {
       showToast('Server connection failed. Unable to save draft.', true);
     }
   };
@@ -186,7 +187,7 @@ export default function Composer() {
       {/* Toast popup */}
       {toast && (
         <div className={`toast ${toast.isError ? 'error' : ''}`}>
-          <CheckCircle size={16} />
+          {toast.isError ? <XCircle size={16} /> : <CheckCircle size={16} />}
           <span>{toast.message}</span>
         </div>
       )}
@@ -216,7 +217,6 @@ export default function Composer() {
             selectedPlatforms={selectedPlatforms}
             onSave={handleSave}
             onClear={handleClear}
-            validationData={validationData}
           />
           <Validation
             validationData={validationData}
@@ -272,7 +272,8 @@ export default function Composer() {
                 <h4 className="history-post-title">{post.title}</h4>
                 <p className="history-post-content">{post.content}</p>
                 <div className="history-post-media-count">
-                  📸 {post.mediaCount} attached media asset{post.mediaCount !== 1 ? 's' : ''}
+                  <ImageIcon size={14} />
+                  {post.mediaCount} attached media asset{post.mediaCount !== 1 ? 's' : ''}
                 </div>
                 <button
                   type="button"
@@ -291,7 +292,8 @@ export default function Composer() {
                   }}
                   onClick={() => setActiveModalPost(post)}
                 >
-                  👁️ View Published Feed
+                  <Eye size={14} />
+                  View Published Feed
                 </button>
               </div>
             ))}
@@ -303,7 +305,14 @@ export default function Composer() {
       {activeModalPost && (
         <div className="modal-overlay" onClick={() => setActiveModalPost(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setActiveModalPost(null)}>×</button>
+            <button
+              type="button"
+              className="modal-close"
+              aria-label="Close published feed preview"
+              onClick={() => setActiveModalPost(null)}
+            >
+              <X size={18} />
+            </button>
             <h3 className="section-title" style={{ marginBottom: '1.25rem' }}>
               Published Feed Preview: {activeModalPost.title}
             </h3>
