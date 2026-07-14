@@ -3,7 +3,21 @@ import PlatformTab from './PlatformTab';
 import Editor from './Editor';
 import Validation from './Validation';
 import Preview from './Preview';
-import { Calendar, CheckCircle, Eye, Image as ImageIcon, Layers, X, XCircle } from 'lucide-react';
+import {
+  Calendar,
+  CheckCircle,
+  Database,
+  Eye,
+  FilePenLine,
+  Image as ImageIcon,
+  Layers,
+  Pencil,
+  Save,
+  Sparkles,
+  Trash2,
+  X,
+  XCircle
+} from 'lucide-react';
 
 const PLATFORM_RULES = {
   twitter: { maxChars: 280, maxMedia: 4, mediaRequired: false, name: 'X (Twitter)' },
@@ -13,6 +27,23 @@ const PLATFORM_RULES = {
 };
 
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:5001/api';
+const DRAFT_STORAGE_KEY = 'socialComposer.localDrafts.v1';
+
+const wait = (ms = 350) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const createDraftSnapshot = ({ id, title, content, mediaUrls, platforms }) => {
+  const now = new Date().toISOString();
+
+  return {
+    id: id || crypto.randomUUID(),
+    title: title?.trim() || 'Untitled Local Draft',
+    content,
+    mediaUrls,
+    platforms,
+    updatedAt: now,
+    createdAt: now,
+  };
+};
 
 export default function Composer() {
   const [title, setTitle] = useState('');
@@ -21,6 +52,10 @@ export default function Composer() {
   const [selectedPlatforms, setSelectedPlatforms] = useState(['twitter']);
   const [validationData, setValidationData] = useState({});
   const [history, setHistory] = useState([]);
+  const [localDrafts, setLocalDrafts] = useState([]);
+  const [activeDraftId, setActiveDraftId] = useState(null);
+  const [draftLoadingId, setDraftLoadingId] = useState(null);
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [activeModalPost, setActiveModalPost] = useState(null);
 
@@ -55,6 +90,22 @@ export default function Composer() {
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
+
+  useEffect(() => {
+    try {
+      const savedDrafts = JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || '[]');
+      if (Array.isArray(savedDrafts)) {
+        setLocalDrafts(savedDrafts);
+      }
+    } catch {
+      setLocalDrafts([]);
+      showToast('Local draft storage could not be read. Starting fresh.', true);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(localDrafts));
+  }, [localDrafts]);
 
   // Robust client-side fallback validation when the server is offline.
   const runFallbackValidation = useCallback(() => {
@@ -129,7 +180,76 @@ export default function Composer() {
     return () => clearTimeout(delayDebounceFn);
   }, [content, mediaUrls.length, selectedPlatforms, runFallbackValidation]);
 
-  // Submit/Save draft handler
+  const handleSaveLocalDraft = async () => {
+    if (!content.trim() && mediaUrls.length === 0 && !title.trim()) {
+      showToast('Add content, media, or a title before saving a local draft.', true);
+      return;
+    }
+
+    setIsDraftSaving(true);
+
+    try {
+      await wait();
+
+      const draft = createDraftSnapshot({
+        id: activeDraftId,
+        title,
+        content,
+        mediaUrls,
+        platforms: selectedPlatforms,
+      });
+
+      setLocalDrafts((drafts) => {
+        const existingDraft = drafts.find((item) => item.id === draft.id);
+        if (existingDraft) {
+          return drafts.map((item) => (
+            item.id === draft.id
+              ? { ...draft, createdAt: item.createdAt }
+              : item
+          ));
+        }
+
+        return [draft, ...drafts];
+      });
+      setActiveDraftId(draft.id);
+      showToast(activeDraftId ? 'Local draft updated in browser storage.' : 'Local draft saved in browser storage.');
+    } finally {
+      setIsDraftSaving(false);
+    }
+  };
+
+  const handleLoadLocalDraft = async (draft) => {
+    setDraftLoadingId(draft.id);
+
+    try {
+      await wait(250);
+      setTitle(draft.title);
+      setContent(draft.content);
+      setMediaUrls(draft.mediaUrls || []);
+      setSelectedPlatforms(draft.platforms?.length ? draft.platforms : ['twitter']);
+      setActiveDraftId(draft.id);
+      showToast('Local draft loaded into composer.');
+    } finally {
+      setDraftLoadingId(null);
+    }
+  };
+
+  const handleDeleteLocalDraft = async (draftId) => {
+    setDraftLoadingId(draftId);
+
+    try {
+      await wait(250);
+      setLocalDrafts((drafts) => drafts.filter((draft) => draft.id !== draftId));
+      if (activeDraftId === draftId) {
+        setActiveDraftId(null);
+      }
+      showToast('Local draft deleted.');
+    } finally {
+      setDraftLoadingId(null);
+    }
+  };
+
+  // Submit/publish handler
   const handleSave = async () => {
     if (selectedPlatforms.length === 0) {
       showToast('Select at least one social media platform.', true);
@@ -180,7 +300,10 @@ export default function Composer() {
     setTitle('');
     setContent('');
     setMediaUrls([]);
+    setActiveDraftId(null);
   };
+
+  const activeDraft = localDrafts.find((draft) => draft.id === activeDraftId);
 
   return (
     <div>
@@ -195,14 +318,39 @@ export default function Composer() {
       {/* Header */}
       <div className="dashboard-header">
         <div className="dashboard-title">
-          <h1>Multi-Platform Post Composer</h1>
-          <p>Compose, validate, and preview posts dynamically across social networks.</p>
+          <span className="experiment-kicker">Experiment 2 / Frontend Draft Management</span>
+          <h1>SocialComposer Draft Studio</h1>
+          <p>Build, save, edit, delete, validate, and publish posts through a frontend-first workflow.</p>
         </div>
+        <div className="dashboard-stats-strip" aria-label="Draft workflow statistics">
+          <div>
+            <strong>{localDrafts.length}</strong>
+            <span>local drafts</span>
+          </div>
+          <div>
+            <strong>{history.length}</strong>
+            <span>db posts</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="experiment-banner">
+        <div>
+          <span>CO2 - BT2 / CO3 - BT3</span>
+          <strong>Frontend CRUD with mock async APIs and localStorage persistence</strong>
+        </div>
+        <Sparkles size={28} />
       </div>
 
       <div className="composer-grid">
         {/* Workspace Column */}
         <div className="composer-workspace">
+          {activeDraft && (
+            <div className="active-draft-ribbon">
+              <FilePenLine size={16} />
+              Editing local draft: <strong>{activeDraft.title}</strong>
+            </div>
+          )}
           <PlatformTab
             selectedPlatforms={selectedPlatforms}
             togglePlatform={togglePlatform}
@@ -216,7 +364,10 @@ export default function Composer() {
             setMediaUrls={setMediaUrls}
             selectedPlatforms={selectedPlatforms}
             onSave={handleSave}
+            onSaveLocalDraft={handleSaveLocalDraft}
             onClear={handleClear}
+            isDraftSaving={isDraftSaving}
+            activeDraftId={activeDraftId}
           />
           <Validation
             validationData={validationData}
@@ -232,10 +383,81 @@ export default function Composer() {
         />
       </div>
 
+      {/* Frontend Draft Manager */}
+      <section className="draft-manager-section">
+        <div className="draft-manager-header">
+          <div>
+            <span className="experiment-kicker">Frontend State + localStorage</span>
+            <h3 className="section-title" style={{ margin: 0 }}>
+              <Save size={18} /> Local Draft Control Room
+            </h3>
+          </div>
+          <p>
+            Drafts below are managed entirely in the browser with simulated async save, load, update, and delete flows.
+          </p>
+        </div>
+
+        {localDrafts.length === 0 ? (
+          <div className="draft-empty-state">
+            <FilePenLine size={32} />
+            <strong>No local drafts saved yet.</strong>
+            <span>Use "Save Local Draft" in the composer to create the first frontend-managed draft.</span>
+          </div>
+        ) : (
+          <div className="draft-grid">
+            {localDrafts.map((draft, index) => (
+              <article
+                key={draft.id}
+                className={`draft-card ${draft.id === activeDraftId ? 'active' : ''}`}
+                style={{ '--draft-index': `"${String(index + 1).padStart(2, '0')}"` }}
+              >
+                <div className="draft-card-topline">
+                  <span>Draft {String(index + 1).padStart(2, '0')}</span>
+                  <time>
+                    {new Date(draft.updatedAt).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </time>
+                </div>
+                <h4>{draft.title}</h4>
+                <p>{draft.content || 'Media-only draft without body copy.'}</p>
+                <div className="draft-card-meta">
+                  <span><Layers size={12} /> {draft.platforms.length} platform{draft.platforms.length !== 1 ? 's' : ''}</span>
+                  <span><ImageIcon size={12} /> {draft.mediaUrls.length} media</span>
+                </div>
+                <div className="draft-card-actions">
+                  <button
+                    type="button"
+                    className="btn-secondary icon-action"
+                    onClick={() => handleLoadLocalDraft(draft)}
+                    disabled={draftLoadingId === draft.id}
+                  >
+                    <Pencil size={14} />
+                    {draftLoadingId === draft.id ? 'Loading' : 'Edit'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary icon-action danger"
+                    onClick={() => handleDeleteLocalDraft(draft.id)}
+                    disabled={draftLoadingId === draft.id}
+                  >
+                    <Trash2 size={14} />
+                    Delete
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* History Database Viewer */}
       <div className="history-section">
         <h3 className="section-title" style={{ margin: 0 }}>
-          <Layers size={18} style={{ color: 'var(--accent-primary)' }} /> Database Publish Registry
+          <Database size={18} style={{ color: 'var(--accent-primary)' }} /> Database Publish Registry
         </h3>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
           Loaded drafts and posts successfully saved to MongoDB Atlas database.
@@ -243,12 +465,12 @@ export default function Composer() {
 
         {history.length === 0 ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-subtle)', fontSize: '0.85rem' }}>
-            No saved posts inside backend db. Click "Publish Draft" above to add one.
+            No saved posts inside backend db. Click "Publish to Database" above to add one.
           </div>
         ) : (
           <div className="history-grid">
             {history.map((post) => (
-              <div key={post.id} className="history-card">
+              <div key={post._id || post.id} className="history-card">
                 <div className="history-meta">
                   <span className="history-date">
                     <Calendar size={10} style={{ marginRight: '0.25rem', display: 'inline' }} />

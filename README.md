@@ -1,17 +1,42 @@
-# SocialComposer - Multi-Platform Post Composer
+# SocialComposer - Full Stack Experiments
 
-SocialComposer is a full-stack social media draft composer for creating, validating, previewing, and saving posts across multiple platforms. It includes a React/Vite frontend, an Express API, MongoDB Atlas persistence, and Vercel deployment support.
+SocialComposer is a course project built as a series of experiments that gradually lead toward one final full-stack product. The current application focuses on social media post composition, frontend draft management, validation, previews, MongoDB persistence, and deployment.
 
 Live app: https://fullstack2-postcomposer.vercel.app
 
-## Features
+## Experiments
+
+### Experiment 1: Multi-Platform Post Composer
 
 - Compose post drafts with a title, content, hashtags, and sample media attachments.
 - Select one or more target platforms: X (Twitter), Facebook, Instagram, and LinkedIn.
 - Preview the post in platform-specific feed mockups.
 - Validate character limits, media limits, and platform requirements before saving.
-- Save valid drafts to MongoDB Atlas.
-- View previously saved drafts in the database publish registry.
+- Publish valid drafts to MongoDB Atlas.
+- View previously published drafts in the database publish registry.
+
+### Experiment 2: Frontend Draft Management System
+
+Aim: Implement a draft management system that allows users to save, retrieve, and manage post drafts within the frontend, with simulated backend-style interactions.
+
+Objectives:
+
+- Manage draft data using React frontend state.
+- Implement CRUD operations for draft handling.
+- Demonstrate asynchronous UI workflows with mock delays.
+- Persist drafts using browser `localStorage`.
+
+COs mapped: CO2 - BT2, CO3 - BT3.
+
+## Features
+
+- Save the current composer state as a local draft.
+- Update an existing local draft after loading it back into the composer.
+- View saved local drafts in a dedicated Draft Control Room.
+- Edit/load local drafts asynchronously using mock API-style delays.
+- Delete local drafts from browser storage.
+- Publish validated posts to the backend database separately from local draft saving.
+- Use a bold green, white, and black frontend direction inspired by maximalism, brutalism, and spatial layout.
 
 ## Validation Rules
 
