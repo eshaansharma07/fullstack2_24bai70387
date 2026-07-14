@@ -13,6 +13,7 @@ export default function Composer() {
   const [validationData, setValidationData] = useState({});
   const [history, setHistory] = useState([]);
   const [toast, setToast] = useState(null);
+  const [activeModalPost, setActiveModalPost] = useState(null);
 
   const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:5001/api';
 
@@ -273,11 +274,47 @@ export default function Composer() {
                 <div className="history-post-media-count">
                   📸 {post.mediaCount} attached media asset{post.mediaCount !== 1 ? 's' : ''}
                 </div>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  style={{
+                    padding: '0.4rem 0.75rem',
+                    fontSize: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem',
+                    marginTop: '0.75rem',
+                    cursor: 'pointer',
+                    width: '100%',
+                    borderRadius: '6px'
+                  }}
+                  onClick={() => setActiveModalPost(post)}
+                >
+                  👁️ View Published Feed
+                </button>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Published Post Mock Preview Modal */}
+      {activeModalPost && (
+        <div className="modal-overlay" onClick={() => setActiveModalPost(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setActiveModalPost(null)}>×</button>
+            <h3 className="section-title" style={{ marginBottom: '1.25rem' }}>
+              Published Feed Preview: {activeModalPost.title}
+            </h3>
+            <Preview
+              content={activeModalPost.content}
+              mediaUrls={activeModalPost.mediaUrls}
+              selectedPlatforms={activeModalPost.platforms}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
