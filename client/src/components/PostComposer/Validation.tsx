@@ -1,7 +1,12 @@
-import React from 'react';
 import { CheckCircle, AlertTriangle, XCircle, ShieldAlert } from 'lucide-react';
+import type { PlatformId, ValidationData } from '../../types';
 
-export default function Validation({ validationData, selectedPlatforms }) {
+interface ValidationProps {
+  validationData: ValidationData;
+  selectedPlatforms: PlatformId[];
+}
+
+export default function Validation({ validationData, selectedPlatforms }: ValidationProps) {
   if (selectedPlatforms.length === 0) {
     return (
       <div className="validation-card">
@@ -16,7 +21,7 @@ export default function Validation({ validationData, selectedPlatforms }) {
   }
 
   // Get active platform names
-  const platformNames = {
+  const platformNames: Record<PlatformId, string> = {
     twitter: 'X (Twitter)',
     facebook: 'Facebook',
     instagram: 'Instagram',

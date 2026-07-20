@@ -1,6 +1,8 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from './store';
+import type { PlatformId, PlatformsState } from '../types';
 
-const initialState = {
+const initialState: PlatformsState = {
   ids: ['twitter', 'facebook', 'instagram', 'linkedin'],
   selectedIds: ['twitter'],
   entities: {
@@ -39,7 +41,7 @@ const platformsSlice = createSlice({
   name: 'platforms',
   initialState,
   reducers: {
-    togglePlatform(state, action) {
+    togglePlatform(state, action: PayloadAction<PlatformId>) {
       const platformId = action.payload;
       if (state.selectedIds.includes(platformId)) {
         state.selectedIds = state.selectedIds.filter((id) => id !== platformId);
@@ -47,7 +49,7 @@ const platformsSlice = createSlice({
         state.selectedIds.push(platformId);
       }
     },
-    setSelectedPlatforms(state, action) {
+    setSelectedPlatforms(state, action: PayloadAction<PlatformId[] | undefined>) {
       state.selectedIds = action.payload?.length ? action.payload : ['twitter'];
     },
   },
@@ -55,9 +57,9 @@ const platformsSlice = createSlice({
 
 export const { setSelectedPlatforms, togglePlatform } = platformsSlice.actions;
 
-export const selectPlatformRules = (state) => state.platforms.entities;
-export const selectSelectedPlatformIds = (state) => state.platforms.selectedIds;
-export const selectPlatforms = (state) => (
+export const selectPlatformRules = (state: RootState) => state.platforms.entities;
+export const selectSelectedPlatformIds = (state: RootState) => state.platforms.selectedIds;
+export const selectPlatforms = (state: RootState) => (
   state.platforms.ids.map((id) => state.platforms.entities[id]).filter(Boolean)
 );
 

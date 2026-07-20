@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { type Connection, type InferSchemaType, type Model } from 'mongoose';
 
 // Define the schema representing our posts in MongoDB
 const PostSchema = new mongoose.Schema({
@@ -28,13 +28,23 @@ const PostSchema = new mongoose.Schema({
   }
 });
 
-// Compile schema into model. Reuse it across serverless hot reloads.
-const Post = mongoose.models.Post || mongoose.model('Post', PostSchema);
+type PostDocument = InferSchemaType<typeof PostSchema>;
 
-let connectionPromise = null;
+export interface PostInput {
+  title: string;
+  content: string;
+  mediaCount: number;
+  mediaUrls: string[];
+  platforms: string[];
+}
+
+// Compile schema into model. Reuse it across serverless hot reloads.
+const Post = (mongoose.models.Post as Model<PostDocument> | undefined) || mongoose.model<PostDocument>('Post', PostSchema);
+
+let connectionPromise: Promise<typeof mongoose> | null = null;
 
 // Connection helper
-export async function connectDb() {
+export async function connectDb(): Promise<Connection> {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
     throw new Error('MONGODB_URI is not defined in environment variables.');
@@ -74,7 +84,7 @@ export async function getPosts() {
 }
 
 // Write record
-export async function savePost(postData) {
+export async function savePost(postData: PostInput) {
   try {
     await connectDb();
     const newPost = new Post(postData);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type CSSProperties } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PlatformTab from './PlatformTab';
 import Editor from './Editor';
@@ -31,34 +31,45 @@ import {
   selectPublishedPosts,
   setComposerField
 } from '../../store/postsSlice';
+import type { AppDispatch, RootState } from '../../store/store';
 import {
   selectPlatformRules,
   selectSelectedPlatformIds,
   setSelectedPlatforms,
   togglePlatform
 } from '../../store/platformsSlice';
+import type { PlatformId, PostDraft, PublishedPost, ValidationData } from '../../types';
 
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:5001/api';
 
+interface ToastState {
+  message: string;
+  isError: boolean;
+}
+
+const getErrorMessage = (error: unknown, fallback = 'Something went wrong.') => (
+  typeof error === 'string' ? error : fallback
+);
+
 export default function Composer() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const composer = useSelector(selectComposer);
   const localDrafts = useSelector(selectLocalDrafts);
   const history = useSelector(selectPublishedPosts);
   const selectedPlatforms = useSelector(selectSelectedPlatformIds);
   const platformRules = useSelector(selectPlatformRules);
-  const draftLoadingId = useSelector((state) => state.posts.localDrafts.loadingId);
-  const localDraftStatus = useSelector((state) => state.posts.localDrafts.status);
-  const publishStatus = useSelector((state) => state.posts.publishStatus);
+  const draftLoadingId = useSelector((state: RootState) => state.posts.localDrafts.loadingId);
+  const localDraftStatus = useSelector((state: RootState) => state.posts.localDrafts.status);
+  const publishStatus = useSelector((state: RootState) => state.posts.publishStatus);
   const { title, content, mediaUrls, activeDraftId } = composer;
-  const [validationData, setValidationData] = useState({});
-  const [toast, setToast] = useState(null);
-  const [activeModalPost, setActiveModalPost] = useState(null);
+  const [validationData, setValidationData] = useState<ValidationData>({});
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [activeModalPost, setActiveModalPost] = useState<PublishedPost | null>(null);
   const isDraftSaving = localDraftStatus === 'saving';
   const isPublishing = publishStatus === 'loading';
 
   // Helper: Trigger toast notification
-  const showToast = (message, isError = false) => {
+  const showToast = (message: string, isError = false) => {
     setToast({ message, isError });
     setTimeout(() => setToast(null), 4000);
   };
@@ -67,16 +78,16 @@ export default function Composer() {
     dispatch(fetchPublishedPosts());
     dispatch(loadLocalDrafts())
       .unwrap()
-      .catch((message) => showToast(message, true));
+      .catch((message) => showToast(getErrorMessage(message), true));
   }, [dispatch]);
 
-  const setTitle = (value) => dispatch(setComposerField({ field: 'title', value }));
-  const setContent = (value) => dispatch(setComposerField({ field: 'content', value }));
-  const setMediaUrls = (value) => dispatch(setComposerField({ field: 'mediaUrls', value }));
+  const setTitle = (value: string) => dispatch(setComposerField({ field: 'title', value }));
+  const setContent = (value: string) => dispatch(setComposerField({ field: 'content', value }));
+  const setMediaUrls = (value: string[]) => dispatch(setComposerField({ field: 'mediaUrls', value }));
 
   // Robust client-side fallback validation when the server is offline.
   const runFallbackValidation = useCallback(() => {
-    const fallbackResults = {};
+    const fallbackResults: ValidationData = {};
 
     selectedPlatforms.forEach((platform) => {
       const rule = platformRules[platform];
@@ -154,26 +165,26 @@ export default function Composer() {
       const result = await dispatch(saveLocalDraft()).unwrap();
       showToast(result.isUpdate ? 'Local draft updated in browser storage.' : 'Local draft saved in browser storage.');
     } catch (message) {
-      showToast(message, true);
+      showToast(getErrorMessage(message), true);
     }
   };
 
-  const handleLoadLocalDraft = async (draft) => {
+  const handleLoadLocalDraft = async (draft: PostDraft) => {
     try {
       const loadedDraft = await dispatch(loadDraftIntoComposer(draft.id)).unwrap();
       dispatch(setSelectedPlatforms(loadedDraft.platforms));
       showToast('Local draft loaded into composer.');
     } catch (message) {
-      showToast(message, true);
+      showToast(getErrorMessage(message), true);
     }
   };
 
-  const handleDeleteLocalDraft = async (draftId) => {
+  const handleDeleteLocalDraft = async (draftId: string) => {
     try {
       await dispatch(deleteLocalDraft(draftId)).unwrap();
       showToast('Local draft deleted.');
     } catch (message) {
-      showToast(message || 'Unable to delete local draft.', true);
+      showToast(getErrorMessage(message, 'Unable to delete local draft.'), true);
     }
   };
 
@@ -186,7 +197,7 @@ export default function Composer() {
 
     // Check validation data first
     let hasErrors = false;
-    selectedPlatforms.forEach((p) => {
+    selectedPlatforms.forEach((p: PlatformId) => {
       if (validationData[p] && !validationData[p].isValid) {
         hasErrors = true;
       }
@@ -201,7 +212,7 @@ export default function Composer() {
       await dispatch(publishCurrentPost()).unwrap();
       showToast('Post draft successfully saved to persistence database!');
     } catch (message) {
-      showToast(message, true);
+      showToast(getErrorMessage(message), true);
     }
   };
 
@@ -306,7 +317,7 @@ export default function Composer() {
               <article
                 key={draft.id}
                 className={`draft-card ${draft.id === activeDraftId ? 'active' : ''}`}
-                style={{ '--draft-index': `"${String(index + 1).padStart(2, '0')}"` }}
+                style={{ '--draft-index': `"${String(index + 1).padStart(2, '0')}"` } as CSSProperties}
               >
                 <div className="draft-card-topline">
                   <span>Draft {String(index + 1).padStart(2, '0')}</span>

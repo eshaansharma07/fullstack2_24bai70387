@@ -1,4 +1,3 @@
-import React from 'react';
 import Composer from './components/PostComposer/Composer';
 
 export default function App() {

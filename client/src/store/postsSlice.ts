@@ -1,13 +1,20 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from './store';
+import type {
+  PostDraft,
+  PostsState,
+  PublishedPost,
+  ValidationData
+} from '../types';
 
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:5001/api';
 const DRAFT_STORAGE_KEY = 'socialComposer.localDrafts.v1';
 
 const wait = (ms = 350) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const normalizeItems = (items) => {
-  const ids = [];
-  const entities = {};
+const normalizeItems = <T extends { id?: string; _id?: string }>(items: T[]) => {
+  const ids: string[] = [];
+  const entities: Record<string, T & { id: string }> = {};
 
   items.forEach((item) => {
     const id = item.id || item._id;
@@ -19,11 +26,18 @@ const normalizeItems = (items) => {
   return { ids, entities };
 };
 
-const getDraftArray = (draftsState) => (
+const getDraftArray = (draftsState: PostsState['localDrafts']) => (
   draftsState.ids.map((id) => draftsState.entities[id]).filter(Boolean)
 );
 
-const createDraftSnapshot = ({ id, title, content, mediaUrls, platforms, createdAt }) => {
+const createDraftSnapshot = ({
+  id,
+  title,
+  content,
+  mediaUrls,
+  platforms,
+  createdAt
+}: Partial<Pick<PostDraft, 'id' | 'createdAt'>> & Pick<PostDraft, 'title' | 'content' | 'mediaUrls' | 'platforms'>): PostDraft => {
   const now = new Date().toISOString();
 
   return {
@@ -37,11 +51,11 @@ const createDraftSnapshot = ({ id, title, content, mediaUrls, platforms, created
   };
 };
 
-const persistDrafts = (drafts) => {
+const persistDrafts = (drafts: PostDraft[]) => {
   localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
 };
 
-export const loadLocalDrafts = createAsyncThunk(
+export const loadLocalDrafts = createAsyncThunk<PostDraft[], void, { rejectValue: string }>(
   'posts/loadLocalDrafts',
   async (_, { rejectWithValue }) => {
     try {
@@ -53,7 +67,11 @@ export const loadLocalDrafts = createAsyncThunk(
   }
 );
 
-export const saveLocalDraft = createAsyncThunk(
+export const saveLocalDraft = createAsyncThunk<
+  { draft: PostDraft; isUpdate: boolean },
+  void,
+  { state: RootState; rejectValue: string }
+>(
   'posts/saveLocalDraft',
   async (_, { getState, rejectWithValue }) => {
     const { composer, localDrafts } = getState().posts;
@@ -69,7 +87,7 @@ export const saveLocalDraft = createAsyncThunk(
       ? localDrafts.entities[composer.activeDraftId]
       : null;
     const draft = createDraftSnapshot({
-      id: composer.activeDraftId,
+      id: composer.activeDraftId ?? undefined,
       title: composer.title,
       content: composer.content,
       mediaUrls: composer.mediaUrls,
@@ -87,7 +105,11 @@ export const saveLocalDraft = createAsyncThunk(
   }
 );
 
-export const loadDraftIntoComposer = createAsyncThunk(
+export const loadDraftIntoComposer = createAsyncThunk<
+  PostDraft,
+  string,
+  { state: RootState; rejectValue: string }
+>(
   'posts/loadDraftIntoComposer',
   async (draftId, { getState, rejectWithValue }) => {
     await wait(250);
@@ -101,7 +123,7 @@ export const loadDraftIntoComposer = createAsyncThunk(
   }
 );
 
-export const deleteLocalDraft = createAsyncThunk(
+export const deleteLocalDraft = createAsyncThunk<string, string, { state: RootState }>(
   'posts/deleteLocalDraft',
   async (draftId, { getState }) => {
     await wait(250);
@@ -113,7 +135,7 @@ export const deleteLocalDraft = createAsyncThunk(
   }
 );
 
-export const fetchPublishedPosts = createAsyncThunk(
+export const fetchPublishedPosts = createAsyncThunk<PublishedPost[], void, { rejectValue: string }>(
   'posts/fetchPublishedPosts',
   async (_, { rejectWithValue }) => {
     try {
@@ -128,7 +150,11 @@ export const fetchPublishedPosts = createAsyncThunk(
   }
 );
 
-export const publishCurrentPost = createAsyncThunk(
+export const publishCurrentPost = createAsyncThunk<
+  PublishedPost,
+  void,
+  { state: RootState; rejectValue: string }
+>(
   'posts/publishCurrentPost',
   async (_, { getState, rejectWithValue }) => {
     const { composer } = getState().posts;
@@ -159,7 +185,7 @@ export const publishCurrentPost = createAsyncThunk(
   }
 );
 
-const initialState = {
+const initialState: PostsState = {
   composer: {
     title: '',
     content: '',
@@ -182,13 +208,21 @@ const initialState = {
   publishStatus: 'idle',
 };
 
+type ComposerFieldPayload =
+  | { field: 'title' | 'content'; value: string }
+  | { field: 'mediaUrls'; value: string[] };
+
 const postsSlice = createSlice({
   name: 'posts',
   initialState,
   reducers: {
-    setComposerField(state, action) {
+    setComposerField(state, action: PayloadAction<ComposerFieldPayload>) {
       const { field, value } = action.payload;
-      state.composer[field] = value;
+      if (field === 'mediaUrls') {
+        state.composer.mediaUrls = value;
+      } else {
+        state.composer[field] = value;
+      }
     },
     clearComposer(state) {
       state.composer.title = '';
@@ -213,7 +247,7 @@ const postsSlice = createSlice({
         state.localDrafts.ids = [];
         state.localDrafts.entities = {};
         state.localDrafts.status = 'failed';
-        state.localDrafts.error = action.payload;
+        state.localDrafts.error = action.payload ?? 'Local draft storage could not be read.';
       })
       .addCase(saveLocalDraft.pending, (state) => {
         state.localDrafts.status = 'saving';
@@ -229,7 +263,7 @@ const postsSlice = createSlice({
       })
       .addCase(saveLocalDraft.rejected, (state, action) => {
         state.localDrafts.status = 'failed';
-        state.localDrafts.error = action.payload;
+        state.localDrafts.error = action.payload ?? 'Unable to save local draft.';
       })
       .addCase(loadDraftIntoComposer.pending, (state, action) => {
         state.localDrafts.loadingId = action.meta.arg;
@@ -244,7 +278,7 @@ const postsSlice = createSlice({
       })
       .addCase(loadDraftIntoComposer.rejected, (state, action) => {
         state.localDrafts.loadingId = null;
-        state.localDrafts.error = action.payload;
+        state.localDrafts.error = action.payload ?? 'Local draft could not be loaded.';
       })
       .addCase(deleteLocalDraft.pending, (state, action) => {
         state.localDrafts.loadingId = action.meta.arg;
@@ -260,7 +294,7 @@ const postsSlice = createSlice({
       })
       .addCase(deleteLocalDraft.rejected, (state, action) => {
         state.localDrafts.loadingId = null;
-        state.localDrafts.error = action.payload;
+        state.localDrafts.error = action.error.message ?? 'Unable to delete local draft.';
       })
       .addCase(fetchPublishedPosts.pending, (state) => {
         state.publishedPosts.status = 'loading';
@@ -273,7 +307,7 @@ const postsSlice = createSlice({
       })
       .addCase(fetchPublishedPosts.rejected, (state, action) => {
         state.publishedPosts.status = 'failed';
-        state.publishedPosts.error = action.payload;
+        state.publishedPosts.error = action.payload ?? 'Failed to fetch published posts.';
       })
       .addCase(publishCurrentPost.pending, (state) => {
         state.publishStatus = 'loading';
@@ -299,12 +333,14 @@ const postsSlice = createSlice({
 
 export const { clearComposer, setComposerField } = postsSlice.actions;
 
-export const selectComposer = (state) => state.posts.composer;
-export const selectLocalDrafts = (state) => (
+export const selectComposer = (state: RootState) => state.posts.composer;
+export const selectLocalDrafts = (state: RootState) => (
   state.posts.localDrafts.ids.map((id) => state.posts.localDrafts.entities[id]).filter(Boolean)
 );
-export const selectPublishedPosts = (state) => (
+export const selectPublishedPosts = (state: RootState) => (
   state.posts.publishedPosts.ids.map((id) => state.posts.publishedPosts.entities[id]).filter(Boolean)
 );
+
+export type { ValidationData };
 
 export default postsSlice.reducer;

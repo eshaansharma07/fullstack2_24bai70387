@@ -1,6 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import type { Request, Response } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +17,33 @@ const PORT = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json());
 
-const PLATFORM_RULES = {
+type PlatformId = 'twitter' | 'facebook' | 'instagram' | 'linkedin';
+
+interface PlatformRule {
+  name: string;
+  maxChars: number;
+  maxMedia: number;
+  mediaRequired: boolean;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+interface ValidateBody {
+  content?: string;
+  mediaCount?: number;
+  platforms?: string[];
+}
+
+interface SaveBody extends ValidateBody {
+  title?: string;
+  mediaUrls?: string[];
+}
+
+const PLATFORM_RULES: Record<PlatformId, PlatformRule> = {
   twitter: {
     name: 'X (Twitter)',
     maxChars: 280,
@@ -43,10 +70,18 @@ const PLATFORM_RULES = {
   }
 };
 
-function validatePostForPlatform(platform, content, mediaCount) {
+function isPlatformId(platform: string): platform is PlatformId {
+  return platform in PLATFORM_RULES;
+}
+
+function validatePostForPlatform(platform: string, content = '', mediaCount = 0): ValidationResult {
+  if (!isPlatformId(platform)) {
+    return { isValid: false, errors: ['Unknown platform selected'], warnings: [] };
+  }
+
   const rules = PLATFORM_RULES[platform];
   if (!rules) {
-    return { isValid: false, errors: ['Unknown platform selected'] };
+    return { isValid: false, errors: ['Unknown platform selected'], warnings: [] };
   }
 
   const errors = [];
@@ -86,17 +121,17 @@ function validatePostForPlatform(platform, content, mediaCount) {
 }
 
 // Endpoint: Validate
-app.post('/api/posts/validate', (req, res) => {
-  const { content, mediaCount, platforms } = req.body;
+app.post('/api/posts/validate', (req: Request<unknown, unknown, ValidateBody>, res: Response) => {
+  const { content = '', mediaCount = 0, platforms } = req.body;
 
   if (!platforms || !Array.isArray(platforms) || platforms.length === 0) {
     return res.status(400).json({ error: 'At least one platform must be selected.' });
   }
 
-  const results = {};
+  const results: Record<string, ValidationResult> = {};
   let overallValid = true;
 
-  platforms.forEach(platform => {
+  platforms.forEach((platform) => {
     const result = validatePostForPlatform(platform, content, mediaCount);
     results[platform] = result;
     if (!result.isValid) {
@@ -111,17 +146,23 @@ app.post('/api/posts/validate', (req, res) => {
 });
 
 // Endpoint: Save (async MongoDB write)
-app.post('/api/posts/save', async (req, res) => {
-  const { title, content, mediaCount, platforms, mediaUrls } = req.body;
+app.post('/api/posts/save', async (req: Request<unknown, unknown, SaveBody>, res: Response) => {
+  const {
+    title,
+    content = '',
+    mediaCount = 0,
+    platforms,
+    mediaUrls = []
+  } = req.body;
 
   if (!platforms || !Array.isArray(platforms) || platforms.length === 0) {
     return res.status(400).json({ error: 'At least one platform must be selected.' });
   }
 
   let overallValid = true;
-  const validationResults = {};
+  const validationResults: Record<string, ValidationResult> = {};
 
-  platforms.forEach(platform => {
+  platforms.forEach((platform) => {
     const result = validatePostForPlatform(platform, content, mediaCount);
     validationResults[platform] = result;
     if (!result.isValid) {
@@ -149,7 +190,8 @@ app.post('/api/posts/save', async (req, res) => {
       post: saved
     });
   } catch (error) {
-    const isMissingMongoUri = error.message.includes('MONGODB_URI');
+    const message = error instanceof Error ? error.message : '';
+    const isMissingMongoUri = message.includes('MONGODB_URI');
     res.status(isMissingMongoUri ? 500 : 503).json({
       error: isMissingMongoUri
         ? 'Database is not configured. Add MONGODB_URI to the server environment.'
@@ -164,7 +206,8 @@ app.get('/api/posts/history', async (req, res) => {
     const posts = await getPosts();
     res.json(posts);
   } catch (error) {
-    const isMissingMongoUri = error.message.includes('MONGODB_URI');
+    const message = error instanceof Error ? error.message : '';
+    const isMissingMongoUri = message.includes('MONGODB_URI');
     res.status(isMissingMongoUri ? 500 : 503).json({
       error: isMissingMongoUri
         ? 'Database is not configured. Add MONGODB_URI to the server environment.'

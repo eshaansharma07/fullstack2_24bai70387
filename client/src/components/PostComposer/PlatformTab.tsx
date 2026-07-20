@@ -1,8 +1,20 @@
-import React from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
+import type { PlatformId } from '../../types';
 
-export default function PlatformTab({ selectedPlatforms, togglePlatform }) {
-  const platforms = [
+interface PlatformTabProps {
+  selectedPlatforms: PlatformId[];
+  togglePlatform: (platformId: PlatformId) => void;
+}
+
+interface PlatformOption {
+  id: PlatformId;
+  name: string;
+  icon: LucideIcon;
+}
+
+export default function PlatformTab({ selectedPlatforms, togglePlatform }: PlatformTabProps) {
+  const platforms: PlatformOption[] = [
     { id: 'twitter', name: 'X (Twitter)', icon: Twitter },
     { id: 'facebook', name: 'Facebook', icon: Facebook },
     { id: 'instagram', name: 'Instagram', icon: Instagram },

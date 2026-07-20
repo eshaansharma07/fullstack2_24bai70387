@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Twitter, Facebook, Instagram, Linkedin, Heart, MessageCircle, Share2, Send, Bookmark, MoreHorizontal, ThumbsUp } from 'lucide-react';
+import type { PlatformId } from '../../types';
 
-export default function Preview({ content, mediaUrls, selectedPlatforms }) {
-  const [activeTab, setActiveTab] = useState('');
+interface PreviewProps {
+  content: string;
+  mediaUrls: string[];
+  selectedPlatforms: PlatformId[];
+}
+
+export default function Preview({ content, mediaUrls, selectedPlatforms }: PreviewProps) {
+  const [activeTab, setActiveTab] = useState<PlatformId | ''>('');
 
   // Auto-switch to the first selected platform
   useEffect(() => {
     if (selectedPlatforms.length > 0) {
-      if (!selectedPlatforms.includes(activeTab)) {
+      if (activeTab === '' || !selectedPlatforms.includes(activeTab)) {
         setActiveTab(selectedPlatforms[0]);
       }
     } else {
@@ -33,7 +40,7 @@ export default function Preview({ content, mediaUrls, selectedPlatforms }) {
     );
   }
 
-  const renderMediaGrid = (platform) => {
+  const renderMediaGrid = (platform: PlatformId) => {
     if (mediaUrls.length === 0) return null;
 
     let gridClass = 'tweet-media-grid';

@@ -1,5 +1,35 @@
-import React from 'react';
 import { Database, Hash, Image as ImageIcon, Save, Trash2, X } from 'lucide-react';
+import type { PlatformId } from '../../types';
+
+interface EditorProps {
+  title: string;
+  setTitle: (value: string) => void;
+  content: string;
+  setContent: (value: string) => void;
+  mediaUrls: string[];
+  setMediaUrls: (value: string[]) => void;
+  selectedPlatforms: PlatformId[];
+  onSave: () => void;
+  onSaveLocalDraft: () => void;
+  onClear: () => void;
+  isDraftSaving: boolean;
+  isPublishing: boolean;
+  activeDraftId: string | null;
+}
+
+const characterLimits: Record<PlatformId, number> = {
+  twitter: 280,
+  facebook: 63206,
+  instagram: 2200,
+  linkedin: 3000,
+};
+
+const mediaLimits: Record<PlatformId, number> = {
+  twitter: 4,
+  facebook: 10,
+  instagram: 10,
+  linkedin: 9,
+};
 
 export default function Editor({
   title,
@@ -15,10 +45,9 @@ export default function Editor({
   isDraftSaving,
   isPublishing,
   activeDraftId
-}) {
+}: EditorProps) {
   const maxCharLimit = selectedPlatforms.reduce((min, platform) => {
-    const limits = { twitter: 280, facebook: 63206, instagram: 2200, linkedin: 3000 };
-    return Math.min(min, limits[platform]);
+    return Math.min(min, characterLimits[platform]);
   }, Infinity);
 
   const charCount = content ? content.length : 0;
@@ -33,10 +62,9 @@ export default function Editor({
     { name: 'Coffee Cup', url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&auto=format&fit=crop' },
   ];
 
-  const addPresetImage = (url) => {
+  const addPresetImage = (url: string) => {
     const maxMediaLimit = selectedPlatforms.reduce((min, platform) => {
-      const limits = { twitter: 4, facebook: 10, instagram: 10, linkedin: 9 };
-      return Math.min(min, limits[platform]);
+      return Math.min(min, mediaLimits[platform]);
     }, Infinity);
 
     if (mediaUrls.length >= (maxMediaLimit === Infinity ? 10 : maxMediaLimit)) {
@@ -46,11 +74,11 @@ export default function Editor({
     setMediaUrls([...mediaUrls, url]);
   };
 
-  const removeMedia = (index) => {
+  const removeMedia = (index: number) => {
     setMediaUrls(mediaUrls.filter((_, i) => i !== index));
   };
 
-  const appendHashtag = (tag) => {
+  const appendHashtag = (tag: string) => {
     const space = content.endsWith(' ') || content.length === 0 ? '' : ' ';
     setContent(content + space + tag);
   };

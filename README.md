@@ -66,12 +66,12 @@ Validation runs on the backend before saving. The frontend also includes fallbac
 
 ## Tech Stack
 
-- Frontend: React, Vite, lucide-react
+- Frontend: React, TypeScript, Vite, lucide-react
 - State management: Redux Toolkit, React-Redux
-- Backend: Express, Node.js
+- Backend: TypeScript, Express, Node.js
 - Database: MongoDB Atlas with Mongoose
 - Deployment: Vercel
-- Tooling: npm workspaces, Oxlint
+- Tooling: npm workspaces, TypeScript, Oxlint
 
 ## Project Structure
 
@@ -82,8 +82,10 @@ Validation runs on the backend before saving. The frontend also includes fallbac
 |       `-- components/
 |           `-- PostComposer/
 |       `-- store/          # Redux Toolkit store and slices
+|       `-- types.ts        # Shared client TypeScript types
 |-- server/                 # Express API and MongoDB helpers
 |   `-- src/
+|-- tsconfig.json           # Workspace TypeScript references
 |-- package.json            # Root workspace scripts
 |-- package-lock.json
 `-- vercel.json             # Vercel frontend + API routing
