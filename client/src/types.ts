@@ -2,6 +2,21 @@ export type PlatformId = 'twitter' | 'facebook' | 'instagram' | 'linkedin';
 
 export type LoadStatus = 'idle' | 'loading' | 'saving' | 'succeeded' | 'failed';
 export type PublishStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
+export type AuthStatus = 'idle' | 'checking' | 'authenticated' | 'unauthenticated' | 'failed';
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: 'student' | 'admin';
+}
+
+export interface AuthState {
+  token: string | null;
+  user: AuthUser | null;
+  status: AuthStatus;
+  error: string | null;
+}
 
 export interface PlatformRule {
   id: PlatformId;

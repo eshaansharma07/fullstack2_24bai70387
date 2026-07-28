@@ -1,7 +1,8 @@
 import path from 'path';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,6 +44,38 @@ interface SaveBody extends ValidateBody {
   mediaUrls?: string[];
 }
 
+interface AuthLoginBody {
+  email?: string;
+  password?: string;
+}
+
+interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: 'student' | 'admin';
+}
+
+interface JwtPayload extends AuthUser {
+  iat: number;
+  exp: number;
+}
+
+interface AuthenticatedRequest extends Request {
+  authUser?: AuthUser;
+}
+
+const DEMO_USER: AuthUser = {
+  id: 'usr_demo_social_composer',
+  email: process.env.AUTH_EMAIL || 'student@example.com',
+  name: process.env.AUTH_NAME || 'Student User',
+  role: 'student',
+};
+
+const DEMO_PASSWORD = process.env.AUTH_PASSWORD || 'password123';
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-social-composer-secret';
+const TOKEN_TTL_SECONDS = 60 * 60 * 2;
+
 const PLATFORM_RULES: Record<PlatformId, PlatformRule> = {
   twitter: {
     name: 'X (Twitter)',
@@ -72,6 +105,98 @@ const PLATFORM_RULES: Record<PlatformId, PlatformRule> = {
 
 function isPlatformId(platform: string): platform is PlatformId {
   return platform in PLATFORM_RULES;
+}
+
+function base64UrlEncode(value: string | Buffer) {
+  return Buffer.from(value)
+    .toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+function base64UrlDecode(value: string) {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+  return Buffer.from(normalized, 'base64').toString('utf8');
+}
+
+function signJwt(payload: AuthUser) {
+  const now = Math.floor(Date.now() / 1000);
+  const header = {
+    alg: 'HS256',
+    typ: 'JWT',
+  };
+  const body: JwtPayload = {
+    ...payload,
+    iat: now,
+    exp: now + TOKEN_TTL_SECONDS,
+  };
+  const encodedHeader = base64UrlEncode(JSON.stringify(header));
+  const encodedPayload = base64UrlEncode(JSON.stringify(body));
+  const signature = crypto
+    .createHmac('sha256', JWT_SECRET)
+    .update(`${encodedHeader}.${encodedPayload}`)
+    .digest();
+
+  return `${encodedHeader}.${encodedPayload}.${base64UrlEncode(signature)}`;
+}
+
+function verifyJwt(token: string): JwtPayload | null {
+  const [encodedHeader, encodedPayload, signature] = token.split('.');
+
+  if (!encodedHeader || !encodedPayload || !signature) {
+    return null;
+  }
+
+  const expectedSignature = base64UrlEncode(
+    crypto
+      .createHmac('sha256', JWT_SECRET)
+      .update(`${encodedHeader}.${encodedPayload}`)
+      .digest()
+  );
+
+  const received = Buffer.from(signature);
+  const expected = Buffer.from(expectedSignature);
+
+  if (received.length !== expected.length || !crypto.timingSafeEqual(received, expected)) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(base64UrlDecode(encodedPayload)) as JwtPayload;
+    const now = Math.floor(Date.now() / 1000);
+
+    if (!payload.exp || payload.exp < now) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication token is required.' });
+  }
+
+  const payload = verifyJwt(token);
+
+  if (!payload) {
+    return res.status(401).json({ error: 'Authentication token is invalid or expired.' });
+  }
+
+  req.authUser = {
+    id: payload.id,
+    email: payload.email,
+    name: payload.name,
+    role: payload.role,
+  };
+  next();
 }
 
 function validatePostForPlatform(platform: string, content = '', mediaCount = 0): ValidationResult {
@@ -120,8 +245,28 @@ function validatePostForPlatform(platform: string, content = '', mediaCount = 0)
   };
 }
 
+app.post('/api/auth/login', (req: Request<unknown, unknown, AuthLoginBody>, res: Response) => {
+  const { email = '', password = '' } = req.body;
+  const isValidEmail = email.trim().toLowerCase() === DEMO_USER.email.toLowerCase();
+  const isValidPassword = password === DEMO_PASSWORD;
+
+  if (!isValidEmail || !isValidPassword) {
+    return res.status(401).json({ error: 'Invalid email or password.' });
+  }
+
+  res.json({
+    token: signJwt(DEMO_USER),
+    user: DEMO_USER,
+    expiresIn: TOKEN_TTL_SECONDS,
+  });
+});
+
+app.get('/api/auth/me', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  res.json({ user: req.authUser });
+});
+
 // Endpoint: Validate
-app.post('/api/posts/validate', (req: Request<unknown, unknown, ValidateBody>, res: Response) => {
+app.post('/api/posts/validate', requireAuth, (req: Request<unknown, unknown, ValidateBody>, res: Response) => {
   const { content = '', mediaCount = 0, platforms } = req.body;
 
   if (!platforms || !Array.isArray(platforms) || platforms.length === 0) {
@@ -146,7 +291,7 @@ app.post('/api/posts/validate', (req: Request<unknown, unknown, ValidateBody>, r
 });
 
 // Endpoint: Save (async MongoDB write)
-app.post('/api/posts/save', async (req: Request<unknown, unknown, SaveBody>, res: Response) => {
+app.post('/api/posts/save', requireAuth, async (req: Request<unknown, unknown, SaveBody>, res: Response) => {
   const {
     title,
     content = '',
@@ -201,7 +346,7 @@ app.post('/api/posts/save', async (req: Request<unknown, unknown, SaveBody>, res
 });
 
 // Endpoint: History (async MongoDB query)
-app.get('/api/posts/history', async (req, res) => {
+app.get('/api/posts/history', requireAuth, async (req, res) => {
   try {
     const posts = await getPosts();
     res.json(posts);

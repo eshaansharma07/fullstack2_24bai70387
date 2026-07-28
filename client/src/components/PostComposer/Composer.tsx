@@ -12,8 +12,10 @@ import {
   FilePenLine,
   Image as ImageIcon,
   Layers,
+  LogOut,
   Pencil,
   Save,
+  ShieldCheck,
   Trash2,
   X,
   XCircle
@@ -42,6 +44,11 @@ import {
   setSelectedPlatforms,
   togglePlatform
 } from '../../store/platformsSlice';
+import {
+  logout,
+  selectAuthToken,
+  selectAuthUser
+} from '../../store/authSlice';
 import type { PlatformId, PostDraft, PublishedPost, ValidationData } from '../../types';
 
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:5001/api';
@@ -62,6 +69,8 @@ export default function Composer() {
   const history = useSelector(selectPublishedPosts);
   const selectedPlatforms = useSelector(selectSelectedPlatformIds);
   const platformRules = useSelector(selectPlatformRules);
+  const authToken = useSelector(selectAuthToken);
+  const authUser = useSelector(selectAuthUser);
   const activeDraft = useSelector(selectActiveLocalDraft);
   const draftLoadingId = useSelector(selectLocalDraftLoadingId);
   const localDraftStatus = useSelector(selectLocalDraftStatus);
@@ -150,7 +159,10 @@ export default function Composer() {
       try {
         const res = await fetch(`${API_BASE}/posts/validate`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
           body: JSON.stringify({
             content,
             mediaCount: mediaUrls.length,
@@ -171,7 +183,7 @@ export default function Composer() {
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [content, mediaUrls.length, selectedPlatforms, runFallbackValidation]);
+  }, [authToken, content, mediaUrls.length, selectedPlatforms, runFallbackValidation]);
 
   const handleSaveLocalDraft = useCallback(async () => {
     try {
@@ -233,6 +245,11 @@ export default function Composer() {
     dispatch(togglePlatform(platformId));
   }, [dispatch]);
 
+  const handleLogout = useCallback(() => {
+    dispatch(logout());
+    dispatch(clearComposer());
+  }, [dispatch]);
+
   return (
     <div>
       {/* Toast popup */}
@@ -249,15 +266,28 @@ export default function Composer() {
           <h1>SocialComposer</h1>
           <p>Draft, preview, save, and publish social posts from one focused workspace.</p>
         </div>
-        <div className="dashboard-stats-strip" aria-label="Draft workflow statistics">
-          <div>
-            <strong>{localDrafts.length}</strong>
-            <span>local drafts</span>
+        <div className="dashboard-side-panel">
+          <div className="auth-session-chip">
+            <ShieldCheck size={18} />
+            <div>
+              <strong>{authUser?.name || 'Authenticated User'}</strong>
+              <span>JWT session active</span>
+            </div>
           </div>
-          <div>
-            <strong>{history.length}</strong>
-            <span>db posts</span>
+          <div className="dashboard-stats-strip" aria-label="Draft workflow statistics">
+            <div>
+              <strong>{localDrafts.length}</strong>
+              <span>local drafts</span>
+            </div>
+            <div>
+              <strong>{history.length}</strong>
+              <span>db posts</span>
+            </div>
           </div>
+          <button type="button" className="btn-secondary logout-button" onClick={handleLogout}>
+            <LogOut size={16} />
+            Logout
+          </button>
         </div>
       </div>
 

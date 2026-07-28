@@ -55,6 +55,18 @@ const persistDrafts = (drafts: PostDraft[]) => {
   localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
 };
 
+const getAuthHeaders = (state: RootState) => {
+  const { token } = state.auth;
+
+  if (!token) {
+    return null;
+  }
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
+
 export const loadLocalDrafts = createAsyncThunk<PostDraft[], void, { rejectValue: string }>(
   'posts/loadLocalDrafts',
   async (_, { rejectWithValue }) => {
@@ -135,13 +147,22 @@ export const deleteLocalDraft = createAsyncThunk<string, string, { state: RootSt
   }
 );
 
-export const fetchPublishedPosts = createAsyncThunk<PublishedPost[], void, { rejectValue: string }>(
+export const fetchPublishedPosts = createAsyncThunk<PublishedPost[], void, { state: RootState; rejectValue: string }>(
   'posts/fetchPublishedPosts',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
+    const authHeaders = getAuthHeaders(getState());
+
+    if (!authHeaders) {
+      return rejectWithValue('Login is required to load published posts.');
+    }
+
     try {
-      const res = await fetch(`${API_BASE}/posts/history`);
+      const res = await fetch(`${API_BASE}/posts/history`, {
+        headers: authHeaders,
+      });
       if (!res.ok) {
-        return rejectWithValue('Failed to fetch published posts.');
+        const data = await res.json();
+        return rejectWithValue(data.error || 'Failed to fetch published posts.');
       }
       return await res.json();
     } catch {
@@ -157,13 +178,22 @@ export const publishCurrentPost = createAsyncThunk<
 >(
   'posts/publishCurrentPost',
   async (_, { getState, rejectWithValue }) => {
-    const { composer } = getState().posts;
-    const { selectedIds } = getState().platforms;
+    const state = getState();
+    const { composer } = state.posts;
+    const { selectedIds } = state.platforms;
+    const authHeaders = getAuthHeaders(state);
+
+    if (!authHeaders) {
+      return rejectWithValue('Login is required before publishing.');
+    }
 
     try {
       const res = await fetch(`${API_BASE}/posts/save`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
         body: JSON.stringify({
           title: composer.title || 'Post Draft',
           content: composer.content,
