@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { CheckCircle, AlertTriangle, XCircle, ShieldAlert } from 'lucide-react';
 import type { PlatformId, ValidationData } from '../../types';
 
@@ -6,7 +7,14 @@ interface ValidationProps {
   selectedPlatforms: PlatformId[];
 }
 
-export default function Validation({ validationData, selectedPlatforms }: ValidationProps) {
+const platformNames: Record<PlatformId, string> = {
+  twitter: 'X (Twitter)',
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  linkedin: 'LinkedIn',
+};
+
+function Validation({ validationData, selectedPlatforms }: ValidationProps) {
   if (selectedPlatforms.length === 0) {
     return (
       <div className="validation-card">
@@ -19,14 +27,6 @@ export default function Validation({ validationData, selectedPlatforms }: Valida
       </div>
     );
   }
-
-  // Get active platform names
-  const platformNames: Record<PlatformId, string> = {
-    twitter: 'X (Twitter)',
-    facebook: 'Facebook',
-    instagram: 'Instagram',
-    linkedin: 'LinkedIn',
-  };
 
   return (
     <div className="validation-card">
@@ -79,3 +79,5 @@ export default function Validation({ validationData, selectedPlatforms }: Valida
     </div>
   );
 }
+
+export default memo(Validation);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type CSSProperties } from 'react';
+import { useState, useEffect, useCallback, useMemo, type CSSProperties } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PlatformTab from './PlatformTab';
 import Editor from './Editor';
@@ -26,12 +26,16 @@ import {
   loadLocalDrafts,
   publishCurrentPost,
   saveLocalDraft,
+  selectActiveLocalDraft,
   selectComposer,
+  selectLocalDraftLoadingId,
   selectLocalDrafts,
+  selectLocalDraftStatus,
   selectPublishedPosts,
+  selectPublishStatus,
   setComposerField
 } from '../../store/postsSlice';
-import type { AppDispatch, RootState } from '../../store/store';
+import type { AppDispatch } from '../../store/store';
 import {
   selectPlatformRules,
   selectSelectedPlatformIds,
@@ -58,9 +62,10 @@ export default function Composer() {
   const history = useSelector(selectPublishedPosts);
   const selectedPlatforms = useSelector(selectSelectedPlatformIds);
   const platformRules = useSelector(selectPlatformRules);
-  const draftLoadingId = useSelector((state: RootState) => state.posts.localDrafts.loadingId);
-  const localDraftStatus = useSelector((state: RootState) => state.posts.localDrafts.status);
-  const publishStatus = useSelector((state: RootState) => state.posts.publishStatus);
+  const activeDraft = useSelector(selectActiveLocalDraft);
+  const draftLoadingId = useSelector(selectLocalDraftLoadingId);
+  const localDraftStatus = useSelector(selectLocalDraftStatus);
+  const publishStatus = useSelector(selectPublishStatus);
   const { title, content, mediaUrls, activeDraftId } = composer;
   const [validationData, setValidationData] = useState<ValidationData>({});
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -69,21 +74,29 @@ export default function Composer() {
   const isPublishing = publishStatus === 'loading';
 
   // Helper: Trigger toast notification
-  const showToast = (message: string, isError = false) => {
+  const showToast = useCallback((message: string, isError = false) => {
     setToast({ message, isError });
     setTimeout(() => setToast(null), 4000);
-  };
+  }, []);
 
   useEffect(() => {
     dispatch(fetchPublishedPosts());
     dispatch(loadLocalDrafts())
       .unwrap()
       .catch((message) => showToast(getErrorMessage(message), true));
+  }, [dispatch, showToast]);
+
+  const setTitle = useCallback((value: string) => {
+    dispatch(setComposerField({ field: 'title', value }));
   }, [dispatch]);
 
-  const setTitle = (value: string) => dispatch(setComposerField({ field: 'title', value }));
-  const setContent = (value: string) => dispatch(setComposerField({ field: 'content', value }));
-  const setMediaUrls = (value: string[]) => dispatch(setComposerField({ field: 'mediaUrls', value }));
+  const setContent = useCallback((value: string) => {
+    dispatch(setComposerField({ field: 'content', value }));
+  }, [dispatch]);
+
+  const setMediaUrls = useCallback((value: string[]) => {
+    dispatch(setComposerField({ field: 'mediaUrls', value }));
+  }, [dispatch]);
 
   // Robust client-side fallback validation when the server is offline.
   const runFallbackValidation = useCallback(() => {
@@ -160,16 +173,16 @@ export default function Composer() {
     return () => clearTimeout(delayDebounceFn);
   }, [content, mediaUrls.length, selectedPlatforms, runFallbackValidation]);
 
-  const handleSaveLocalDraft = async () => {
+  const handleSaveLocalDraft = useCallback(async () => {
     try {
       const result = await dispatch(saveLocalDraft()).unwrap();
       showToast(result.isUpdate ? 'Local draft updated in browser storage.' : 'Local draft saved in browser storage.');
     } catch (message) {
       showToast(getErrorMessage(message), true);
     }
-  };
+  }, [dispatch, showToast]);
 
-  const handleLoadLocalDraft = async (draft: PostDraft) => {
+  const handleLoadLocalDraft = useCallback(async (draft: PostDraft) => {
     try {
       const loadedDraft = await dispatch(loadDraftIntoComposer(draft.id)).unwrap();
       dispatch(setSelectedPlatforms(loadedDraft.platforms));
@@ -177,33 +190,29 @@ export default function Composer() {
     } catch (message) {
       showToast(getErrorMessage(message), true);
     }
-  };
+  }, [dispatch, showToast]);
 
-  const handleDeleteLocalDraft = async (draftId: string) => {
+  const handleDeleteLocalDraft = useCallback(async (draftId: string) => {
     try {
       await dispatch(deleteLocalDraft(draftId)).unwrap();
       showToast('Local draft deleted.');
     } catch (message) {
       showToast(getErrorMessage(message, 'Unable to delete local draft.'), true);
     }
-  };
+  }, [dispatch, showToast]);
 
   // Submit/publish handler
-  const handleSave = async () => {
+  const hasValidationErrors = useMemo(() => (
+    selectedPlatforms.some((platform) => validationData[platform] && !validationData[platform]?.isValid)
+  ), [selectedPlatforms, validationData]);
+
+  const handleSave = useCallback(async () => {
     if (selectedPlatforms.length === 0) {
       showToast('Select at least one social media platform.', true);
       return;
     }
 
-    // Check validation data first
-    let hasErrors = false;
-    selectedPlatforms.forEach((p: PlatformId) => {
-      if (validationData[p] && !validationData[p].isValid) {
-        hasErrors = true;
-      }
-    });
-
-    if (hasErrors) {
+    if (hasValidationErrors) {
       showToast('Please fix constraints and validation errors before saving.', true);
       return;
     }
@@ -214,13 +223,15 @@ export default function Composer() {
     } catch (message) {
       showToast(getErrorMessage(message), true);
     }
-  };
+  }, [dispatch, hasValidationErrors, selectedPlatforms.length, showToast]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     dispatch(clearComposer());
-  };
+  }, [dispatch]);
 
-  const activeDraft = localDrafts.find((draft) => draft.id === activeDraftId);
+  const handleTogglePlatform = useCallback((platformId: PlatformId) => {
+    dispatch(togglePlatform(platformId));
+  }, [dispatch]);
 
   return (
     <div>
@@ -261,7 +272,7 @@ export default function Composer() {
           )}
           <PlatformTab
             selectedPlatforms={selectedPlatforms}
-            togglePlatform={(platformId) => dispatch(togglePlatform(platformId))}
+            togglePlatform={handleTogglePlatform}
           />
           <Editor
             title={title}

@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from './store';
 import type { PlatformId, PlatformsState } from '../types';
 
@@ -57,10 +57,18 @@ const platformsSlice = createSlice({
 
 export const { setSelectedPlatforms, togglePlatform } = platformsSlice.actions;
 
+export const selectPlatformIds = (state: RootState) => state.platforms.ids;
 export const selectPlatformRules = (state: RootState) => state.platforms.entities;
 export const selectSelectedPlatformIds = (state: RootState) => state.platforms.selectedIds;
-export const selectPlatforms = (state: RootState) => (
-  state.platforms.ids.map((id) => state.platforms.entities[id]).filter(Boolean)
+
+export const selectPlatforms = createSelector(
+  [selectPlatformIds, selectPlatformRules],
+  (ids, entities) => ids.map((id) => entities[id]).filter(Boolean)
+);
+
+export const selectSelectedPlatformRules = createSelector(
+  [selectSelectedPlatformIds, selectPlatformRules],
+  (selectedIds, entities) => selectedIds.map((id) => entities[id]).filter(Boolean)
 );
 
 export default platformsSlice.reducer;

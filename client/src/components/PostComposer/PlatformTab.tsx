@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import type { PlatformId } from '../../types';
@@ -13,14 +14,14 @@ interface PlatformOption {
   icon: LucideIcon;
 }
 
-export default function PlatformTab({ selectedPlatforms, togglePlatform }: PlatformTabProps) {
-  const platforms: PlatformOption[] = [
-    { id: 'twitter', name: 'X (Twitter)', icon: Twitter },
-    { id: 'facebook', name: 'Facebook', icon: Facebook },
-    { id: 'instagram', name: 'Instagram', icon: Instagram },
-    { id: 'linkedin', name: 'LinkedIn', icon: Linkedin },
-  ];
+const platforms: PlatformOption[] = [
+  { id: 'twitter', name: 'X (Twitter)', icon: Twitter },
+  { id: 'facebook', name: 'Facebook', icon: Facebook },
+  { id: 'instagram', name: 'Instagram', icon: Instagram },
+  { id: 'linkedin', name: 'LinkedIn', icon: Linkedin },
+];
 
+function PlatformTab({ selectedPlatforms, togglePlatform }: PlatformTabProps) {
   return (
     <div className="form-group">
       <label className="form-label">Target Social Platforms</label>
@@ -45,3 +46,5 @@ export default function PlatformTab({ selectedPlatforms, togglePlatform }: Platf
     </div>
   );
 }
+
+export default memo(PlatformTab);

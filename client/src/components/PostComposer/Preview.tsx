@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { Twitter, Facebook, Instagram, Linkedin, Heart, MessageCircle, Share2, Send, Bookmark, MoreHorizontal, ThumbsUp } from 'lucide-react';
 import type { PlatformId } from '../../types';
 
@@ -8,7 +8,7 @@ interface PreviewProps {
   selectedPlatforms: PlatformId[];
 }
 
-export default function Preview({ content, mediaUrls, selectedPlatforms }: PreviewProps) {
+function Preview({ content, mediaUrls, selectedPlatforms }: PreviewProps) {
   const [activeTab, setActiveTab] = useState<PlatformId | ''>('');
 
   // Auto-switch to the first selected platform
@@ -224,3 +224,5 @@ export default function Preview({ content, mediaUrls, selectedPlatforms }: Previ
     </div>
   );
 }
+
+export default memo(Preview);

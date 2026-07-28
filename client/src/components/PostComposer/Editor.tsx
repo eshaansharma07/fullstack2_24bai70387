@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Database, Hash, Image as ImageIcon, Save, Trash2, X } from 'lucide-react';
 import type { PlatformId } from '../../types';
 
@@ -31,7 +32,16 @@ const mediaLimits: Record<PlatformId, number> = {
   linkedin: 9,
 };
 
-export default function Editor({
+const sampleImages = [
+  { name: 'Tech Desk', url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop' },
+  { name: 'Workspace', url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&auto=format&fit=crop' },
+  { name: 'Meeting', url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=600&auto=format&fit=crop' },
+  { name: 'Coffee Cup', url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&auto=format&fit=crop' },
+];
+
+const hashtags = ['#Launch', '#Growth', '#Design', '#WebDev', '#Social'];
+
+function Editor({
   title,
   setTitle,
   content,
@@ -46,27 +56,19 @@ export default function Editor({
   isPublishing,
   activeDraftId
 }: EditorProps) {
-  const maxCharLimit = selectedPlatforms.reduce((min, platform) => {
-    return Math.min(min, characterLimits[platform]);
-  }, Infinity);
+  const maxCharLimit = useMemo(() => (
+    selectedPlatforms.reduce((min, platform) => Math.min(min, characterLimits[platform]), Infinity)
+  ), [selectedPlatforms]);
+
+  const maxMediaLimit = useMemo(() => (
+    selectedPlatforms.reduce((min, platform) => Math.min(min, mediaLimits[platform]), Infinity)
+  ), [selectedPlatforms]);
 
   const charCount = content ? content.length : 0;
   const isOverLimit = charCount > maxCharLimit;
   const isCloseToLimit = maxCharLimit !== Infinity && charCount > maxCharLimit - 40;
 
-  // Preset mockup images for students to test
-  const sampleImages = [
-    { name: 'Tech Desk', url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop' },
-    { name: 'Workspace', url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&auto=format&fit=crop' },
-    { name: 'Meeting', url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=600&auto=format&fit=crop' },
-    { name: 'Coffee Cup', url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&auto=format&fit=crop' },
-  ];
-
   const addPresetImage = (url: string) => {
-    const maxMediaLimit = selectedPlatforms.reduce((min, platform) => {
-      return Math.min(min, mediaLimits[platform]);
-    }, Infinity);
-
     if (mediaUrls.length >= (maxMediaLimit === Infinity ? 10 : maxMediaLimit)) {
       alert(`Max media files limit reached for selected platforms.`);
       return;
@@ -82,8 +84,6 @@ export default function Editor({
     const space = content.endsWith(' ') || content.length === 0 ? '' : ' ';
     setContent(content + space + tag);
   };
-
-  const hashtags = ['#Launch', '#Growth', '#Design', '#WebDev', '#Social'];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -211,3 +211,5 @@ export default function Editor({
     </div>
   );
 }
+
+export default memo(Editor);

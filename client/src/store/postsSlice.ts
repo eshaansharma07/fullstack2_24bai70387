@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from './store';
 import type {
   PostDraft,
@@ -334,11 +334,35 @@ const postsSlice = createSlice({
 export const { clearComposer, setComposerField } = postsSlice.actions;
 
 export const selectComposer = (state: RootState) => state.posts.composer;
-export const selectLocalDrafts = (state: RootState) => (
-  state.posts.localDrafts.ids.map((id) => state.posts.localDrafts.entities[id]).filter(Boolean)
+export const selectLocalDraftIds = (state: RootState) => state.posts.localDrafts.ids;
+export const selectLocalDraftEntities = (state: RootState) => state.posts.localDrafts.entities;
+export const selectLocalDraftStatus = (state: RootState) => state.posts.localDrafts.status;
+export const selectLocalDraftLoadingId = (state: RootState) => state.posts.localDrafts.loadingId;
+export const selectPublishStatus = (state: RootState) => state.posts.publishStatus;
+export const selectPublishedPostIds = (state: RootState) => state.posts.publishedPosts.ids;
+export const selectPublishedPostEntities = (state: RootState) => state.posts.publishedPosts.entities;
+
+export const selectLocalDrafts = createSelector(
+  [selectLocalDraftIds, selectLocalDraftEntities],
+  (ids, entities) => ids.map((id) => entities[id]).filter(Boolean)
 );
-export const selectPublishedPosts = (state: RootState) => (
-  state.posts.publishedPosts.ids.map((id) => state.posts.publishedPosts.entities[id]).filter(Boolean)
+
+export const selectPublishedPosts = createSelector(
+  [selectPublishedPostIds, selectPublishedPostEntities],
+  (ids, entities) => ids.map((id) => entities[id]).filter(Boolean)
+);
+
+export const selectActiveLocalDraft = createSelector(
+  [selectComposer, selectLocalDraftEntities],
+  (composer, entities) => composer.activeDraftId ? entities[composer.activeDraftId] ?? null : null
+);
+
+export const selectComposerStats = createSelector(
+  [selectComposer],
+  ({ content, mediaUrls }) => ({
+    characterCount: content.length,
+    mediaCount: mediaUrls.length,
+  })
 );
 
 export type { ValidationData };
