@@ -1,21 +1,30 @@
 import { memo, useCallback, useState, type FormEvent } from 'react';
-import { KeyRound, LockKeyhole, LogIn, ShieldCheck } from 'lucide-react';
+import { KeyRound, LockKeyhole, LogIn, ShieldCheck, Zap } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, selectAuthError, selectAuthStatus } from '../../store/authSlice';
 import type { AppDispatch } from '../../store/store';
+
+const DEMO_EMAIL = 'student@example.com';
+const DEMO_PASSWORD = 'password123';
 
 function AuthPanel() {
   const dispatch = useDispatch<AppDispatch>();
   const authStatus = useSelector(selectAuthStatus);
   const authError = useSelector(selectAuthError);
-  const [email, setEmail] = useState('student@example.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState(DEMO_EMAIL);
+  const [password, setPassword] = useState(DEMO_PASSWORD);
   const isChecking = authStatus === 'checking';
 
   const handleSubmit = useCallback((event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     dispatch(loginUser({ email, password }));
   }, [dispatch, email, password]);
+
+  const handleDemoLogin = useCallback(() => {
+    setEmail(DEMO_EMAIL);
+    setPassword(DEMO_PASSWORD);
+    dispatch(loginUser({ email: DEMO_EMAIL, password: DEMO_PASSWORD }));
+  }, [dispatch]);
 
   return (
     <section className="auth-shell">
@@ -28,6 +37,33 @@ function AuthPanel() {
         <div className="auth-heading">
           <h1>Secure Login</h1>
           <p>Authenticate once, receive a signed JWT, and use the bearer token for protected composer requests.</p>
+        </div>
+
+        {/* Demo credentials banner for evaluators */}
+        <div className="demo-credentials-banner">
+          <div className="demo-credentials-header">
+            <Zap size={16} />
+            <strong>Demo Credentials</strong>
+          </div>
+          <div className="demo-credentials-body">
+            <div className="demo-credential-row">
+              <span className="demo-label">Email</span>
+              <code className="demo-value">{DEMO_EMAIL}</code>
+            </div>
+            <div className="demo-credential-row">
+              <span className="demo-label">Password</span>
+              <code className="demo-value">{DEMO_PASSWORD}</code>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn-primary demo-login-btn"
+            onClick={handleDemoLogin}
+            disabled={isChecking}
+          >
+            <Zap size={16} />
+            {isChecking ? 'Logging in...' : 'Click Here to Login Instantly'}
+          </button>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
