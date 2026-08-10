@@ -10,6 +10,7 @@ import AppLayout from './components/Layout/AppLayout';
 import DashboardPage from './components/Pages/DashboardPage';
 import ComposePage from './components/Pages/ComposePage';
 import HistoryPage from './components/Pages/HistoryPage';
+import CalendarPage from './components/Pages/CalendarPage';
 import AdminPage from './components/Pages/AdminPage';
 
 export default function App() {
@@ -57,6 +58,7 @@ export default function App() {
           {/* All authenticated users */}
           <Route path="/" element={<DashboardPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
 
           {/* Admin + Editor only */}
           <Route element={<ProtectedRoute allowedRoles={['admin', 'editor']} />}>

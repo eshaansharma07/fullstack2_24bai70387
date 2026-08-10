@@ -1,9 +1,11 @@
 import { createAsyncThunk, createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from './store';
 import type {
+  EntityState,
   PostDraft,
   PostsState,
   PublishedPost,
+  ScheduledPost,
   ValidationData
 } from '../types';
 
@@ -215,6 +217,51 @@ export const publishCurrentPost = createAsyncThunk<
   }
 );
 
+// Generate dynamic initial scheduled posts for current month
+const getInitialScheduledPosts = (): EntityState<ScheduledPost> => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  
+  const sampleData: ScheduledPost[] = [
+    {
+      id: 'sched_001',
+      title: '🚀 Q3 Product Roadmap Announcement',
+      content: 'We are thrilled to unveil our Q3 Product Roadmap! AI-assisted scheduling, multi-account publishing, and deep analytics coming soon.',
+      mediaUrls: ['https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop'],
+      platforms: ['twitter', 'linkedin'],
+      scheduledDate: `${year}-${month}-12`,
+      scheduledTime: '10:00',
+      status: 'scheduled',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'sched_002',
+      title: '🔐 Role-Based Access Control Deep Dive',
+      content: 'Security first! Learn how our RBAC architecture protects administrative routes and ensures granular data access across your team.',
+      mediaUrls: ['https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&auto=format&fit=crop'],
+      platforms: ['facebook', 'linkedin', 'twitter'],
+      scheduledDate: `${year}-${month}-18`,
+      scheduledTime: '14:30',
+      status: 'scheduled',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'sched_003',
+      title: '💡 Weekly Developer Growth Tips',
+      content: 'Consistent multi-channel publishing increases engagement by over 300%! Here are 5 quick tips for optimization.',
+      mediaUrls: [],
+      platforms: ['instagram', 'twitter'],
+      scheduledDate: `${year}-${month}-24`,
+      scheduledTime: '09:15',
+      status: 'scheduled',
+      createdAt: new Date().toISOString(),
+    },
+  ];
+
+  return normalizeItems(sampleData) as EntityState<ScheduledPost>;
+};
+
 const initialState: PostsState = {
   composer: {
     title: '',
@@ -235,6 +282,7 @@ const initialState: PostsState = {
     status: 'idle',
     error: null,
   },
+  scheduledPosts: getInitialScheduledPosts(),
   publishStatus: 'idle',
 };
 
@@ -259,6 +307,32 @@ const postsSlice = createSlice({
       state.composer.content = '';
       state.composer.mediaUrls = [];
       state.composer.activeDraftId = null;
+    },
+    addScheduledPost(state, action: PayloadAction<Omit<ScheduledPost, 'id' | 'createdAt'> & { id?: string }>) {
+      const id = action.payload.id || `sched_${Date.now()}`;
+      const newPost: ScheduledPost = {
+        ...action.payload,
+        id,
+        createdAt: new Date().toISOString(),
+      };
+      state.scheduledPosts.entities[id] = newPost;
+      if (!state.scheduledPosts.ids.includes(id)) {
+        state.scheduledPosts.ids.unshift(id);
+      }
+    },
+    updateScheduledPostDate(state, action: PayloadAction<{ id: string; newDate: string; newTime?: string }>) {
+      const { id, newDate, newTime } = action.payload;
+      if (state.scheduledPosts.entities[id]) {
+        state.scheduledPosts.entities[id].scheduledDate = newDate;
+        if (newTime) {
+          state.scheduledPosts.entities[id].scheduledTime = newTime;
+        }
+      }
+    },
+    deleteScheduledPost(state, action: PayloadAction<string>) {
+      const id = action.payload;
+      delete state.scheduledPosts.entities[id];
+      state.scheduledPosts.ids = state.scheduledPosts.ids.filter((i) => i !== id);
     },
   },
   extraReducers: (builder) => {
@@ -361,7 +435,7 @@ const postsSlice = createSlice({
   },
 });
 
-export const { clearComposer, setComposerField } = postsSlice.actions;
+export const { clearComposer, setComposerField, addScheduledPost, updateScheduledPostDate, deleteScheduledPost } = postsSlice.actions;
 
 export const selectComposer = (state: RootState) => state.posts.composer;
 export const selectLocalDraftIds = (state: RootState) => state.posts.localDrafts.ids;
@@ -371,6 +445,8 @@ export const selectLocalDraftLoadingId = (state: RootState) => state.posts.local
 export const selectPublishStatus = (state: RootState) => state.posts.publishStatus;
 export const selectPublishedPostIds = (state: RootState) => state.posts.publishedPosts.ids;
 export const selectPublishedPostEntities = (state: RootState) => state.posts.publishedPosts.entities;
+export const selectScheduledPostIds = (state: RootState) => state.posts.scheduledPosts.ids;
+export const selectScheduledPostEntities = (state: RootState) => state.posts.scheduledPosts.entities;
 
 export const selectLocalDrafts = createSelector(
   [selectLocalDraftIds, selectLocalDraftEntities],
@@ -379,6 +455,11 @@ export const selectLocalDrafts = createSelector(
 
 export const selectPublishedPosts = createSelector(
   [selectPublishedPostIds, selectPublishedPostEntities],
+  (ids, entities) => ids.map((id) => entities[id]).filter(Boolean)
+);
+
+export const selectScheduledPosts = createSelector(
+  [selectScheduledPostIds, selectScheduledPostEntities],
   (ids, entities) => ids.map((id) => entities[id]).filter(Boolean)
 );
 
@@ -398,3 +479,4 @@ export const selectComposerStats = createSelector(
 export type { ValidationData };
 
 export default postsSlice.reducer;
+

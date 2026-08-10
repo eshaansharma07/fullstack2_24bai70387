@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, PenSquare, Clock, Shield, Eye, Database, Save, Trash2 } from 'lucide-react';
+import { ShieldCheck, PenSquare, Clock, Shield, Eye, Database, Save, Trash2, CalendarDays } from 'lucide-react';
 import { selectAuthUser } from '../../store/authSlice';
 
 const PERMISSIONS = {
@@ -80,6 +80,11 @@ export default function DashboardPage() {
           <Clock size={24} />
           <strong>View History</strong>
           <span>Browse published posts from the database</span>
+        </Link>
+        <Link to="/calendar" className="quick-action-card">
+          <CalendarDays size={24} />
+          <strong>Content Calendar</strong>
+          <span>Schedule posts & view temporal calendar (Exp 1.4.1)</span>
         </Link>
         {role === 'admin' && (
           <Link to="/admin" className="quick-action-card">

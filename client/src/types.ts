@@ -69,6 +69,18 @@ export interface EntityState<T extends { id: string }> {
   entities: Record<string, T>;
 }
 
+export interface ScheduledPost {
+  id: string;
+  title: string;
+  content: string;
+  mediaUrls: string[];
+  platforms: PlatformId[];
+  scheduledDate: string; // ISO format YYYY-MM-DD
+  scheduledTime: string; // HH:mm
+  status: 'scheduled' | 'published';
+  createdAt: string;
+}
+
 export interface PostsState {
   composer: ComposerState;
   localDrafts: EntityState<PostDraft> & {
@@ -80,6 +92,7 @@ export interface PostsState {
     status: Exclude<LoadStatus, 'saving'>;
     error: string | null;
   };
+  scheduledPosts: EntityState<ScheduledPost>;
   publishStatus: PublishStatus;
 }
 
@@ -88,3 +101,4 @@ export interface PlatformsState {
   selectedIds: PlatformId[];
   entities: Record<PlatformId, PlatformRule>;
 }
+
