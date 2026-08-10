@@ -43,7 +43,7 @@
   --shadow-neon: 0 0 25px rgba(16, 185, 129, 0.25);
   
   --transition-fast: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-bounce: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-bounce: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * {
@@ -55,15 +55,23 @@
 body {
   min-height: 100vh;
   background: 
-    radial-gradient(circle at 10% 15%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
-    radial-gradient(circle at 90% 85%, rgba(139, 92, 246, 0.09) 0%, transparent 45%),
-    radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.8) 0%, transparent 100%),
+    radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.85) 0%, transparent 100%),
     #090d16;
+  background-size: 150% 150%;
+  animation: ambientMesh 18s ease-in-out infinite alternate;
   background-attachment: fixed;
   color: var(--text-main);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes ambientMesh {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -90,7 +98,7 @@ button:disabled {
   color: #000000;
 }
 
-/* ── Container Layout ── */
+/* ── Container Layout & Entrance Animation ── */
 
 .app-container {
   min-height: 100vh;
@@ -104,6 +112,18 @@ button:disabled {
   margin: 0 auto;
   padding: clamp(1.25rem, 3vw, 2.5rem);
   flex: 1;
+  animation: pageEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pageEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ── Sexy Glass Navbar ── */
@@ -112,7 +132,7 @@ button:disabled {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(9, 13, 22, 0.8);
+  background: rgba(9, 13, 22, 0.85);
   backdrop-filter: var(--glass-backdrop);
   -webkit-backdrop-filter: var(--glass-backdrop);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -148,6 +168,18 @@ button:disabled {
   font-size: 0.9rem;
   font-weight: 900;
   box-shadow: var(--shadow-neon);
+  animation: floatPulse 4s ease-in-out infinite;
+}
+
+@keyframes floatPulse {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    transform: translateY(-3px);
+    box-shadow: 0 0 32px rgba(16, 185, 129, 0.5);
+  }
 }
 
 .navbar-title {
@@ -182,14 +214,16 @@ button:disabled {
 
 .nav-link:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
 }
 
 .nav-link.active {
   color: var(--accent-primary);
   background: var(--accent-light);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   font-weight: 700;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
 }
 
 .navbar-user {
@@ -225,9 +259,10 @@ button:disabled {
 }
 
 .navbar-logout:hover {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.4);
   color: #ef4444;
+  transform: scale(1.05);
 }
 
 /* ── Glowing Role Badges ── */
@@ -235,26 +270,32 @@ button:disabled {
 .role-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.65rem;
+  padding: 0.22rem 0.7rem;
   font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   border-radius: 20px;
+  animation: badgeGlow 3s infinite alternate ease-in-out;
+}
+
+@keyframes badgeGlow {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.2); }
 }
 
 .role-admin {
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.4);
   color: #fbbf24;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
 }
 
 .role-editor {
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.4);
   color: #34d399;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
 }
 
 .role-viewer {
@@ -282,6 +323,7 @@ button:disabled {
   border-radius: var(--radius-xl);
   padding: clamp(1.5rem, 5vw, 2.5rem);
   box-shadow: var(--shadow-glass);
+  animation: cardPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .auth-mark {
@@ -325,19 +367,35 @@ button:disabled {
   align-items: flex-start;
   gap: 0.4rem;
   padding: 1.15rem;
-  background: rgba(11, 16, 27, 0.7);
+  background: rgba(11, 16, 27, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   cursor: pointer;
   text-align: left;
   transition: var(--transition-bounce);
+  animation: cardPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.role-login-card:nth-child(1) { animation-delay: 0.06s; }
+.role-login-card:nth-child(2) { animation-delay: 0.14s; }
+.role-login-card:nth-child(3) { animation-delay: 0.22s; }
+
+@keyframes cardPopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .role-login-card:hover:not(:disabled) {
-  transform: translateY(-4px);
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(16, 185, 129, 0.15);
-  background: rgba(17, 24, 39, 0.9);
+  transform: translateY(-5px) scale(1.02);
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 16px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.2);
+  background: rgba(17, 24, 39, 0.95);
 }
 
 .role-card-header {
@@ -453,7 +511,7 @@ button:disabled {
 .form-input:focus, .form-textarea:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
   background: rgba(15, 23, 42, 0.95);
 }
 
@@ -473,9 +531,11 @@ button:disabled {
   padding-left: 2.8rem;
 }
 
-/* ── Buttons ── */
+/* ── Buttons with Shimmer Light Beam ── */
 
 .btn-primary {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -492,9 +552,30 @@ button:disabled {
   text-decoration: none;
 }
 
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -75%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  transform: rotate(25deg);
+  transition: all 0.65s ease;
+}
+
+.btn-primary:hover:not(:disabled)::after {
+  left: 125%;
+}
+
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 32px rgba(16, 185, 129, 0.55);
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
 }
 
@@ -510,18 +591,20 @@ button:disabled {
   font-size: 0.85rem;
   font-weight: 600;
   border-radius: var(--radius-md);
-  transition: var(--transition-fast);
+  transition: var(--transition-bounce);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
 }
 
 .btn-secondary.danger:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.5);
   color: #fca5a5;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.25);
 }
 
 /* ── Dashboard & Pages ── */
@@ -538,6 +621,7 @@ button:disabled {
   padding: 2.25rem;
   box-shadow: var(--shadow-glass);
   margin-bottom: 2rem;
+  animation: cardPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .dashboard-welcome-text h1 {
@@ -566,6 +650,7 @@ button:disabled {
   border-radius: var(--radius-lg);
   color: var(--accent-primary);
   box-shadow: var(--shadow-neon);
+  animation: floatPulse 4s ease-in-out infinite;
 }
 
 .section-title {
@@ -596,7 +681,19 @@ button:disabled {
   -webkit-backdrop-filter: var(--glass-backdrop);
   border: var(--glass-border);
   border-radius: var(--radius-lg);
-  transition: var(--transition-fast);
+  transition: var(--transition-bounce);
+  animation: cardPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.permission-card:nth-child(1) { animation-delay: 0.05s; }
+.permission-card:nth-child(2) { animation-delay: 0.09s; }
+.permission-card:nth-child(3) { animation-delay: 0.13s; }
+.permission-card:nth-child(4) { animation-delay: 0.17s; }
+.permission-card:nth-child(5) { animation-delay: 0.21s; }
+.permission-card:nth-child(6) { animation-delay: 0.25s; }
+
+.permission-card:hover {
+  transform: translateY(-3px) scale(1.02);
 }
 
 .permission-card.allowed {
@@ -605,7 +702,7 @@ button:disabled {
 
 .permission-card.denied {
   border-left: 4px solid var(--error);
-  opacity: 0.5;
+  opacity: 0.55;
 }
 
 .permission-card span:first-of-type {
@@ -643,13 +740,18 @@ button:disabled {
   text-decoration: none;
   color: #ffffff;
   transition: var(--transition-bounce);
+  animation: cardPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
+.quick-action-card:nth-child(1) { animation-delay: 0.1s; }
+.quick-action-card:nth-child(2) { animation-delay: 0.18s; }
+.quick-action-card:nth-child(3) { animation-delay: 0.26s; }
+
 .quick-action-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px) scale(1.02);
   border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.2);
-  background: rgba(24, 34, 53, 0.9);
+  box-shadow: 0 16px 32px -10px rgba(0, 0, 0, 0.6), 0 0 24px rgba(16, 185, 129, 0.2);
+  background: rgba(24, 34, 53, 0.95);
 }
 
 .quick-action-card strong {
@@ -735,13 +837,14 @@ button:disabled {
 .platform-tab:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .platform-tab.active {
   background: var(--accent-light);
-  border-color: rgba(16, 185, 129, 0.4);
+  border-color: rgba(16, 185, 129, 0.45);
   color: var(--accent-primary);
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.25);
 }
 
 /* ── Editor Card ── */
@@ -776,7 +879,8 @@ button:disabled {
 
 .hashtag-btn:hover {
   background: var(--accent-light);
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.4);
+  transform: scale(1.05);
 }
 
 .editor-actions {
@@ -818,6 +922,12 @@ button:disabled {
   border-radius: var(--radius-lg);
   padding: 1.25rem;
   margin-top: 1rem;
+  animation: previewFadeIn 0.35s ease-out;
+}
+
+@keyframes previewFadeIn {
+  0% { opacity: 0; transform: scale(0.98); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 /* ── Draft & History Cards ── */
@@ -846,12 +956,13 @@ button:disabled {
   border-radius: var(--radius-xl);
   padding: 1.4rem;
   transition: var(--transition-bounce);
+  animation: cardPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
 .draft-card:hover, .history-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px) scale(1.01);
   border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 18px 36px -10px rgba(0, 0, 0, 0.65);
 }
 
 .history-card h4, .draft-card h4 {
@@ -881,6 +992,7 @@ button:disabled {
   background: var(--accent-primary);
   display: inline-block;
   margin-left: 3px;
+  box-shadow: 0 0 8px var(--accent-primary);
 }
 
 /* ── Admin Panel ── */
@@ -902,6 +1014,7 @@ button:disabled {
   -webkit-backdrop-filter: var(--glass-backdrop);
   border: var(--glass-border);
   border-radius: var(--radius-xl);
+  animation: cardPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
 .admin-user-avatar {
@@ -992,7 +1105,7 @@ button:disabled {
   font-size: 0.9rem;
   font-weight: 600;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.3);
-  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .toast.error {
@@ -1001,22 +1114,23 @@ button:disabled {
 }
 
 @keyframes slide-up {
-  from { transform: translateY(20px); opacity: 0; }
+  from { transform: translateY(24px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* ── Modal Overlay ── */
+/* ── Modal Overlay & Zoom Entrance ── */
 
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 1000;
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  animation: backdropFade 0.25s ease-out forwards;
 }
 
 .modal-content {
@@ -1029,6 +1143,17 @@ button:disabled {
   border-radius: var(--radius-xl);
   padding: 2rem;
   box-shadow: var(--shadow-glass);
+  animation: modalZoomIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes backdropFade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes modalZoomIn {
+  0% { opacity: 0; transform: scale(0.88) translateY(15px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .modal-close {
@@ -1050,6 +1175,7 @@ button:disabled {
 .modal-close:hover {
   background: rgba(239, 68, 68, 0.2);
   color: #ef4444;
+  transform: scale(1.1);
 }
 
 /* ── Responsive ── */
