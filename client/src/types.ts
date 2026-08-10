@@ -1,4 +1,5 @@
 export type PlatformId = 'twitter' | 'facebook' | 'instagram' | 'linkedin';
+export type UserRole = 'admin' | 'editor' | 'viewer';
 
 export type LoadStatus = 'idle' | 'loading' | 'saving' | 'succeeded' | 'failed';
 export type PublishStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -8,7 +9,7 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string;
-  role: 'student' | 'admin';
+  role: UserRole;
 }
 
 export interface AuthState {

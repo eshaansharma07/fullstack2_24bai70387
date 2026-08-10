@@ -53,7 +53,7 @@ interface AuthUser {
   id: string;
   email: string;
   name: string;
-  role: 'student' | 'admin';
+  role: 'admin' | 'editor' | 'viewer';
 }
 
 interface JwtPayload extends AuthUser {
@@ -65,14 +65,25 @@ interface AuthenticatedRequest extends Request {
   authUser?: AuthUser;
 }
 
-const DEMO_USER: AuthUser = {
-  id: 'usr_demo_social_composer',
-  email: process.env.AUTH_EMAIL || 'student@example.com',
-  name: process.env.AUTH_NAME || 'Student User',
-  role: 'student',
-};
+interface DemoUserEntry {
+  user: AuthUser;
+  password: string;
+}
 
-const DEMO_PASSWORD = process.env.AUTH_PASSWORD || 'password123';
+const DEMO_USERS: DemoUserEntry[] = [
+  {
+    user: { id: 'usr_admin_001', email: 'admin@social.com', name: 'Admin User', role: 'admin' },
+    password: 'admin123',
+  },
+  {
+    user: { id: 'usr_editor_001', email: 'editor@social.com', name: 'Editor User', role: 'editor' },
+    password: 'editor123',
+  },
+  {
+    user: { id: 'usr_viewer_001', email: 'viewer@social.com', name: 'Viewer User', role: 'viewer' },
+    password: 'viewer123',
+  },
+];
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-social-composer-secret';
 const TOKEN_TTL_SECONDS = 60 * 60 * 2;
 
@@ -199,6 +210,18 @@ function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunctio
   next();
 }
 
+function requireRole(...allowedRoles: AuthUser['role'][]) {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (!req.authUser) {
+      return res.status(401).json({ error: 'Authentication required.' });
+    }
+    if (!allowedRoles.includes(req.authUser.role)) {
+      return res.status(403).json({ error: 'You do not have permission to perform this action.' });
+    }
+    next();
+  };
+}
+
 function validatePostForPlatform(platform: string, content = '', mediaCount = 0): ValidationResult {
   if (!isPlatformId(platform)) {
     return { isValid: false, errors: ['Unknown platform selected'], warnings: [] };
@@ -247,16 +270,19 @@ function validatePostForPlatform(platform: string, content = '', mediaCount = 0)
 
 app.post('/api/auth/login', (req: Request<unknown, unknown, AuthLoginBody>, res: Response) => {
   const { email = '', password = '' } = req.body;
-  const isValidEmail = email.trim().toLowerCase() === DEMO_USER.email.toLowerCase();
-  const isValidPassword = password === DEMO_PASSWORD;
+  const targetEmail = email.trim().toLowerCase();
+  
+  const found = DEMO_USERS.find(
+    entry => entry.user.email.toLowerCase() === targetEmail && entry.password === password
+  );
 
-  if (!isValidEmail || !isValidPassword) {
+  if (!found) {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
 
   res.json({
-    token: signJwt(DEMO_USER),
-    user: DEMO_USER,
+    token: signJwt(found.user),
+    user: found.user,
     expiresIn: TOKEN_TTL_SECONDS,
   });
 });
@@ -291,7 +317,7 @@ app.post('/api/posts/validate', requireAuth, (req: Request<unknown, unknown, Val
 });
 
 // Endpoint: Save (async MongoDB write)
-app.post('/api/posts/save', requireAuth, async (req: Request<unknown, unknown, SaveBody>, res: Response) => {
+app.post('/api/posts/save', requireAuth, requireRole('admin', 'editor'), async (req: Request<unknown, unknown, SaveBody>, res: Response) => {
   const {
     title,
     content = '',
@@ -358,6 +384,26 @@ app.get('/api/posts/history', requireAuth, async (req, res) => {
         ? 'Database is not configured. Add MONGODB_URI to the server environment.'
         : 'Failed to fetch post history.'
     });
+  }
+});
+
+app.get('/api/admin/users', requireAuth, requireRole('admin'), (req: AuthenticatedRequest, res: Response) => {
+  const users = DEMO_USERS.map(({ user }) => ({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+  }));
+  res.json({ users });
+});
+
+app.delete('/api/posts/:id', requireAuth, requireRole('admin'), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { deletePost } = await import('./db.js');
+    await deletePost(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete post.' });
   }
 });
 

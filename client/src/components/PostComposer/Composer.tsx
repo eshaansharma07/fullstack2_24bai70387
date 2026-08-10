@@ -12,10 +12,8 @@ import {
   FilePenLine,
   Image as ImageIcon,
   Layers,
-  LogOut,
   Pencil,
   Save,
-  ShieldCheck,
   Trash2,
   X,
   XCircle
@@ -45,9 +43,7 @@ import {
   togglePlatform
 } from '../../store/platformsSlice';
 import {
-  logout,
-  selectAuthToken,
-  selectAuthUser
+  selectAuthToken
 } from '../../store/authSlice';
 import type { PlatformId, PostDraft, PublishedPost, ValidationData } from '../../types';
 
@@ -70,7 +66,6 @@ export default function Composer() {
   const selectedPlatforms = useSelector(selectSelectedPlatformIds);
   const platformRules = useSelector(selectPlatformRules);
   const authToken = useSelector(selectAuthToken);
-  const authUser = useSelector(selectAuthUser);
   const activeDraft = useSelector(selectActiveLocalDraft);
   const draftLoadingId = useSelector(selectLocalDraftLoadingId);
   const localDraftStatus = useSelector(selectLocalDraftStatus);
@@ -245,11 +240,6 @@ export default function Composer() {
     dispatch(togglePlatform(platformId));
   }, [dispatch]);
 
-  const handleLogout = useCallback(() => {
-    dispatch(logout());
-    dispatch(clearComposer());
-  }, [dispatch]);
-
   return (
     <div>
       {/* Toast popup */}
@@ -260,34 +250,15 @@ export default function Composer() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="dashboard-header">
-        <div className="dashboard-title">
-          <h1>SocialComposer</h1>
-          <p>Draft, preview, save, and publish social posts from one focused workspace.</p>
+      {/* Stats Bar */}
+      <div className="composer-stats-bar">
+        <div className="stat-chip">
+          <Save size={14} />
+          <strong>{localDrafts.length}</strong> Local Drafts
         </div>
-        <div className="dashboard-side-panel">
-          <div className="auth-session-chip">
-            <ShieldCheck size={18} />
-            <div>
-              <strong>{authUser?.name || 'Authenticated User'}</strong>
-              <span>JWT session active</span>
-            </div>
-          </div>
-          <div className="dashboard-stats-strip" aria-label="Draft workflow statistics">
-            <div>
-              <strong>{localDrafts.length}</strong>
-              <span>local drafts</span>
-            </div>
-            <div>
-              <strong>{history.length}</strong>
-              <span>db posts</span>
-            </div>
-          </div>
-          <button type="button" className="btn-secondary logout-button" onClick={handleLogout}>
-            <LogOut size={16} />
-            Logout
-          </button>
+        <div className="stat-chip">
+          <Database size={14} />
+          <strong>{history.length}</strong> DB Posts
         </div>
       </div>
 

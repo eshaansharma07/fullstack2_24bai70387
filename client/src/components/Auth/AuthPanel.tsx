@@ -1,69 +1,129 @@
 import { memo, useCallback, useState, type FormEvent } from 'react';
-import { KeyRound, LockKeyhole, LogIn, ShieldCheck, Zap } from 'lucide-react';
+import { KeyRound, LockKeyhole, LogIn, ShieldCheck, Zap, Shield, PenSquare, Eye } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { loginUser, selectAuthError, selectAuthStatus } from '../../store/authSlice';
 import type { AppDispatch } from '../../store/store';
 
-const DEMO_EMAIL = 'student@example.com';
-const DEMO_PASSWORD = 'password123';
+interface DemoAccount {
+  role: string;
+  email: string;
+  password: string;
+  name: string;
+  description: string;
+  icon: typeof Shield;
+  permissions: string[];
+}
+
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  {
+    role: 'admin',
+    email: 'admin@social.com',
+    password: 'admin123',
+    name: 'Admin User',
+    description: 'Full access to all features',
+    icon: Shield,
+    permissions: ['Compose', 'Publish', 'History', 'Admin Panel', 'Delete Posts'],
+  },
+  {
+    role: 'editor',
+    email: 'editor@social.com',
+    password: 'editor123',
+    name: 'Editor User',
+    description: 'Create and publish content',
+    icon: PenSquare,
+    permissions: ['Compose', 'Publish', 'History'],
+  },
+  {
+    role: 'viewer',
+    email: 'viewer@social.com',
+    password: 'viewer123',
+    name: 'Viewer User',
+    description: 'Read-only access',
+    icon: Eye,
+    permissions: ['History'],
+  },
+];
 
 function AuthPanel() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const authStatus = useSelector(selectAuthStatus);
   const authError = useSelector(selectAuthError);
-  const [email, setEmail] = useState(DEMO_EMAIL);
-  const [password, setPassword] = useState(DEMO_PASSWORD);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loggingInRole, setLoggingInRole] = useState<string | null>(null);
   const isChecking = authStatus === 'checking';
 
-  const handleSubmit = useCallback((event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    dispatch(loginUser({ email, password }));
-  }, [dispatch, email, password]);
+    const result = await dispatch(loginUser({ email, password }));
+    if (loginUser.fulfilled.match(result)) {
+      navigate('/');
+    }
+  }, [dispatch, email, password, navigate]);
 
-  const handleDemoLogin = useCallback(() => {
-    setEmail(DEMO_EMAIL);
-    setPassword(DEMO_PASSWORD);
-    dispatch(loginUser({ email: DEMO_EMAIL, password: DEMO_PASSWORD }));
-  }, [dispatch]);
+  const handleRoleLogin = useCallback(async (account: DemoAccount) => {
+    setLoggingInRole(account.role);
+    setEmail(account.email);
+    setPassword(account.password);
+    const result = await dispatch(loginUser({ email: account.email, password: account.password }));
+    if (loginUser.fulfilled.match(result)) {
+      navigate('/');
+    }
+    setLoggingInRole(null);
+  }, [dispatch, navigate]);
 
   return (
     <section className="auth-shell">
       <div className="auth-card">
         <div className="auth-mark">
           <ShieldCheck size={28} />
-          JWT AUTH
+          JWT + RBAC
         </div>
 
         <div className="auth-heading">
           <h1>Secure Login</h1>
-          <p>Authenticate once, receive a signed JWT, and use the bearer token for protected composer requests.</p>
+          <p>Role-Based Access Control with JWT authentication. Select a role below to login instantly, or enter credentials manually.</p>
         </div>
 
-        {/* Demo credentials banner for evaluators */}
-        <div className="demo-credentials-banner">
-          <div className="demo-credentials-header">
-            <Zap size={16} />
-            <strong>Demo Credentials</strong>
-          </div>
-          <div className="demo-credentials-body">
-            <div className="demo-credential-row">
-              <span className="demo-label">Email</span>
-              <code className="demo-value">{DEMO_EMAIL}</code>
-            </div>
-            <div className="demo-credential-row">
-              <span className="demo-label">Password</span>
-              <code className="demo-value">{DEMO_PASSWORD}</code>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="btn-primary demo-login-btn"
-            onClick={handleDemoLogin}
-            disabled={isChecking}
-          >
-            <Zap size={16} />
-            {isChecking ? 'Logging in...' : 'Click Here to Login Instantly'}
-          </button>
+        {/* Role Cards */}
+        <div className="role-cards-grid">
+          {DEMO_ACCOUNTS.map((account) => {
+            const Icon = account.icon;
+            return (
+              <button
+                key={account.role}
+                type="button"
+                className={`role-login-card role-card-${account.role}`}
+                onClick={() => handleRoleLogin(account)}
+                disabled={isChecking}
+              >
+                <div className="role-card-header">
+                  <Icon size={20} />
+                  <span className={`role-badge role-${account.role}`}>{account.role}</span>
+                </div>
+                <strong>{account.name}</strong>
+                <span className="role-card-desc">{account.description}</span>
+                <div className="role-card-perms">
+                  {account.permissions.map((p) => (
+                    <span key={p} className="role-perm-tag">{p}</span>
+                  ))}
+                </div>
+                <div className="role-card-creds">
+                  <code>{account.email}</code>
+                  <code>{account.password}</code>
+                </div>
+                {loggingInRole === account.role && (
+                  <span className="role-card-loading">Logging in...</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="auth-divider">
+          <span>or login manually</span>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -78,6 +138,7 @@ function AuthPanel() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="username"
+                placeholder="Enter email address"
                 required
               />
             </div>
@@ -94,6 +155,7 @@ function AuthPanel() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
+                placeholder="Enter password"
                 required
               />
             </div>
@@ -112,9 +174,9 @@ function AuthPanel() {
         </form>
 
         <div className="auth-flow">
-          <span>1. Credentials</span>
-          <span>2. Signed Token</span>
-          <span>3. Stateless Requests</span>
+          <span>1. Select Role</span>
+          <span>2. JWT Token</span>
+          <span>3. RBAC Routes</span>
         </div>
       </div>
     </section>

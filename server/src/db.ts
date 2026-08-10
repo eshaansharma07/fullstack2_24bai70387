@@ -94,3 +94,8 @@ export async function savePost(postData: PostInput) {
     throw error;
   }
 }
+
+export async function deletePost(id: string) {
+  await connectDb();
+  await Post.findByIdAndDelete(id);
+}
