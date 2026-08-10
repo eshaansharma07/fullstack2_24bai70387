@@ -400,7 +400,8 @@ app.get('/api/admin/users', requireAuth, requireRole('admin'), (req: Authenticat
 app.delete('/api/posts/:id', requireAuth, requireRole('admin'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { deletePost } = await import('./db.js');
-    await deletePost(req.params.id);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await deletePost(id);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete post.' });
