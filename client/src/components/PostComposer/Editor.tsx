@@ -1,5 +1,5 @@
-import { memo, useMemo } from 'react';
-import { Database, Hash, Image as ImageIcon, Save, Trash2, X } from 'lucide-react';
+import { memo, useMemo, useState } from 'react';
+import { Database, Hash, Image as ImageIcon, Save, Trash2, X, Sparkles, Smile, CheckCircle, AlertCircle } from 'lucide-react';
 import type { PlatformId } from '../../types';
 
 interface EditorProps {
@@ -39,7 +39,28 @@ const sampleImages = [
   { name: 'Coffee Cup', url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&auto=format&fit=crop' },
 ];
 
-const hashtags = ['#Launch', '#Growth', '#Design', '#WebDev', '#Social'];
+const presets = [
+  {
+    name: '🚀 Product Launch',
+    title: '🚀 Major Product Update v2.0 Released!',
+    copy: 'Exciting news! We just shipped version 2.0 of SocialComposer. Faster workflow, multi-role RBAC, and real-time previews! Check it out now. 👇\n\n#BuildInPublic #TechLaunch #React #WebDev',
+    media: ['https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop'],
+  },
+  {
+    name: '🔥 Hype Feature',
+    title: '🔥 New Role-Based Access Control Is Live',
+    copy: 'Security first! 🔐 Admins can now manage permissions, Editors can publish, and Viewers get read-only access. Full RBAC demo inside our new dashboard.\n\n#Security #FullStack #MongoDB #DevCommunity',
+    media: ['https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&auto=format&fit=crop'],
+  },
+  {
+    name: '💡 Pro Tip',
+    title: '💡 Quick Tip for Social Growth',
+    copy: 'Consistent multi-channel publishing increases post reach by over 3x! 📈 Use our social composer to craft tailored copy for Twitter, Facebook, Instagram & LinkedIn in one go.\n\n#Growth #SocialMedia #MarketingTips',
+    media: [],
+  },
+];
+
+const hashtags = ['#Launch', '#Growth', '#Design', '#WebDev', '#Social', '#AI', '#Tech', '#Startup'];
 
 function Editor({
   title,
@@ -56,6 +77,8 @@ function Editor({
   isPublishing,
   activeDraftId
 }: EditorProps) {
+  const [activeTone, setActiveTone] = useState<string>('hype');
+
   const maxCharLimit = useMemo(() => (
     selectedPlatforms.reduce((min, platform) => Math.min(min, characterLimits[platform]), Infinity)
   ), [selectedPlatforms]);
@@ -67,6 +90,14 @@ function Editor({
   const charCount = content ? content.length : 0;
   const isOverLimit = charCount > maxCharLimit;
   const isCloseToLimit = maxCharLimit !== Infinity && charCount > maxCharLimit - 40;
+
+  const applyPreset = (preset: typeof presets[0]) => {
+    setTitle(preset.title);
+    setContent(preset.copy);
+    if (preset.media.length > 0) {
+      setMediaUrls(preset.media);
+    }
+  };
 
   const addPresetImage = (url: string) => {
     if (mediaUrls.length >= (maxMediaLimit === Infinity ? 10 : maxMediaLimit)) {
@@ -85,8 +116,31 @@ function Editor({
     setContent(content + space + tag);
   };
 
+  const enhanceWithEmojis = () => {
+    const emojis = ['🚀', '⚡', '🔥', '💡', '✨', '🎯'];
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    setContent(`${randomEmoji} ${content} ${randomEmoji}`);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* Quick Starter Templates */}
+      <div className="preset-templates-bar">
+        <span className="section-badge-tag">✨ TEMPLATES</span>
+        <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', flex: 1 }}>
+          {presets.map((p) => (
+            <button
+              key={p.name}
+              type="button"
+              className="template-chip-btn"
+              onClick={() => applyPreset(p)}
+            >
+              {p.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Title */}
       <div className="form-group">
         <label className="form-label" htmlFor="post-title">
@@ -102,7 +156,7 @@ function Editor({
         />
       </div>
 
-      {/* Editor Textarea */}
+      {/* Editor Textarea with Controls */}
       <div className="form-group">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem' }}>
           <label className="form-label" htmlFor="post-body" style={{ margin: 0 }}>
@@ -135,12 +189,51 @@ function Editor({
             rows={5}
           />
         </div>
+
+        {/* Toolbar Helpers */}
+        <div className="editor-quick-toolbar">
+          <button type="button" className="toolbar-pill-btn" onClick={enhanceWithEmojis}>
+            <Smile size={13} /> Add Emojis
+          </button>
+          <span className="toolbar-divider">|</span>
+          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)' }}>Tone:</span>
+          {['hype', 'professional', 'casual'].map((tone) => (
+            <button
+              key={tone}
+              type="button"
+              className={`tone-pill ${activeTone === tone ? 'active' : ''}`}
+              onClick={() => setActiveTone(tone)}
+            >
+              {tone === 'hype' ? '🔥 Hype' : tone === 'professional' ? '👔 Pro' : '💬 Casual'}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {/* Platform Compliance Status Cards */}
+      {selectedPlatforms.length > 0 && (
+        <div className="platform-checklist-box">
+          <span className="section-badge-tag">✔ COMPLIANCE CHECK</span>
+          <div className="checklist-chips">
+            {selectedPlatforms.map((plat) => {
+              const limit = characterLimits[plat];
+              const ok = charCount <= limit;
+              return (
+                <div key={plat} className={`checklist-chip ${ok ? 'ok' : 'err'}`}>
+                  {ok ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                  <span>{plat.toUpperCase()}</span>
+                  <strong>{charCount}/{limit > 10000 ? '∞' : limit}</strong>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Quick Templates & Hashtags */}
       <div className="form-group">
         <label className="form-label">
-          <span className="section-badge-tag">⚡ QUICK HASHTAGS</span> Tap to Add
+          <span className="section-badge-tag">⚡ HASHTAG GENERATOR</span> Tap to Append
         </label>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {hashtags.map((tag) => (
@@ -160,7 +253,7 @@ function Editor({
       {/* Media Uploader Box */}
       <div className="form-group">
         <label className="form-label">
-          <span className="section-badge-tag">🖼️ MEDIA ATTACHMENTS</span> Add Sample Assets
+          <span className="section-badge-tag">🖼️ MEDIA GALLERY</span> Sample Asset Presets
         </label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>

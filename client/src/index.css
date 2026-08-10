@@ -2134,4 +2134,297 @@ button:disabled {
   box-shadow: 6px 6px 0 var(--border);
 }
 
+/* ── Studio Hero Banner & Professional Workspace ── */
+
+.studio-hero-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: 14px;
+  padding: 1.5rem 1.8rem;
+  margin-bottom: 1.75rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.studio-hero-text h1 {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.studio-hero-text p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.pro-workspace-badge {
+  padding: 0.2rem 0.55rem;
+  background: var(--accent-primary);
+  color: var(--text-main);
+  border: 2px solid var(--border);
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+.studio-hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.stat-chip.yellow {
+  background: #fef08a;
+  border: 2px solid var(--border);
+  color: #713f12;
+  box-shadow: 3px 3px 0 var(--border);
+}
+
+.stat-chip.mint {
+  background: #d8ffd7;
+  border: 2px solid var(--border);
+  color: #0f7a37;
+  box-shadow: 3px 3px 0 var(--border);
+}
+
+.stat-chip.status-live {
+  background: var(--text-main);
+  border: 2px solid var(--border);
+  color: var(--accent-primary);
+  box-shadow: 3px 3px 0 var(--border);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  display: inline-block;
+  margin-right: 0.35rem;
+}
+
+/* Preset Templates Bar */
+.preset-templates-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-muted);
+  border: 2px solid var(--border);
+  box-shadow: 3px 3px 0 var(--border);
+  flex-wrap: wrap;
+}
+
+.template-chip-btn {
+  padding: 0.3rem 0.65rem;
+  background: #ffffff;
+  border: 2px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-main);
+  box-shadow: 2px 2px 0 var(--border);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.template-chip-btn:hover {
+  background: var(--accent-light);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--border);
+}
+
+/* Editor Quick Toolbar & Tone Pills */
+.editor-quick-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+  padding: 0.4rem 0.65rem;
+  background: var(--bg-muted);
+  border: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.toolbar-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  background: #ffffff;
+  border: 2px solid var(--border);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-main);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+.toolbar-pill-btn:hover {
+  background: #fef08a;
+}
+
+.toolbar-divider {
+  color: var(--border-soft);
+  font-weight: 900;
+}
+
+.tone-pill {
+  padding: 0.2rem 0.5rem;
+  background: #ffffff;
+  border: 2px solid var(--border);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.tone-pill.active {
+  background: var(--accent-primary);
+  color: var(--text-main);
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+/* Compliance Checklist Box */
+.platform-checklist-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: #ffffff;
+  border: 2px solid var(--border);
+  box-shadow: 3px 3px 0 var(--border);
+  flex-wrap: wrap;
+}
+
+.checklist-chips {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.checklist-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  border: 2px solid var(--border);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.checklist-chip.ok {
+  background: #d8ffd7;
+  color: #0f7a37;
+}
+
+.checklist-chip.err {
+  background: #fca5a5;
+  color: #7f1d1d;
+}
+
+/* Device Mode Toggle Bar */
+.device-toggle-bar {
+  display: flex;
+  background: var(--bg-muted);
+  border: 2px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+.device-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.device-btn.active {
+  background: var(--accent-primary);
+  color: var(--text-main);
+  font-weight: 900;
+}
+
+/* Action items in Twitter/FB/IG mockups */
+.action-btn-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: 0;
+  color: #536471;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, color 0.1s ease;
+}
+
+.action-btn-item:hover {
+  color: #1d9bf0;
+  transform: scale(1.1);
+}
+
+.action-btn-item.liked {
+  color: #f91880;
+}
+
+.action-btn-item.retweeted {
+  color: #00ba7c;
+}
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #1d9bf0;
+  color: #ffffff;
+  font-size: 0.6rem;
+  font-weight: 900;
+}
+
+.fb-action-btn, .li-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fb-action-btn:hover, .li-action-btn:hover {
+  color: var(--accent-primary);
+}
+
+.li-follow-btn {
+  margin-left: auto;
+  padding: 0.2rem 0.55rem;
+  background: #0a66c2;
+  color: #ffffff;
+  border: 2px solid var(--border);
+  font-size: 0.72rem;
+  font-weight: 900;
+  box-shadow: 2px 2px 0 var(--border);
+  cursor: pointer;
+}
+
+
 
