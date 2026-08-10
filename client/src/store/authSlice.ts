@@ -20,14 +20,32 @@ interface JwtPayload extends AuthUser {
   exp?: number;
 }
 
-const readStoredToken = () => localStorage.getItem(AUTH_STORAGE_KEY);
+const readStoredToken = () => {
+  try {
+    return typeof localStorage !== 'undefined' && localStorage.getItem ? localStorage.getItem(AUTH_STORAGE_KEY) : null;
+  } catch {
+    return null;
+  }
+};
 
 const persistToken = (token: string) => {
-  localStorage.setItem(AUTH_STORAGE_KEY, token);
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+      localStorage.setItem(AUTH_STORAGE_KEY, token);
+    }
+  } catch {
+    // ignore storage errors in test env
+  }
 };
 
 const clearStoredToken = () => {
-  localStorage.removeItem(AUTH_STORAGE_KEY);
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage.removeItem) {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+  } catch {
+    // ignore storage errors in test env
+  }
 };
 
 const decodeJwtPayload = (token: string): JwtPayload | null => {

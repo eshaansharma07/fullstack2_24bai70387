@@ -2849,5 +2849,38 @@ button:disabled {
   border: 2px solid var(--border);
 }
 
+/* Performance Metrics Strip (Exp 1.4.2) */
+.perf-metrics-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.85rem;
+  background: #ffffff;
+  border: 3px solid var(--border);
+  box-shadow: 3px 3px 0 var(--border);
+  flex-wrap: wrap;
+}
+
+.perf-metric-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.perf-metric-item.highlight {
+  padding: 0.15rem 0.45rem;
+  background: #d8ffd7;
+  border: 1px solid var(--border);
+  color: #0f7a37;
+}
+
+.perf-icon {
+  color: var(--accent-primary);
+}
+
+
 
 
