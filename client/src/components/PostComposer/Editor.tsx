@@ -89,12 +89,14 @@ function Editor({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Title */}
       <div className="form-group">
-        <label className="form-label" htmlFor="post-title">Post Title (Draft Tag)</label>
+        <label className="form-label" htmlFor="post-title">
+          <span className="section-badge-tag">🏷️ DRAFT TAG</span> Post Title
+        </label>
         <input
           id="post-title"
           type="text"
           className="form-input"
-          placeholder="e.g. Product launch update"
+          placeholder="e.g. 🚀 Product Launch Update Q3"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -102,36 +104,53 @@ function Editor({
 
       {/* Editor Textarea */}
       <div className="form-group">
-        <label className="form-label" htmlFor="post-body">Post Content</label>
-        <div className="textarea-container">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem' }}>
+          <label className="form-label" htmlFor="post-body" style={{ margin: 0 }}>
+            <span className="section-badge-tag">✍️ COMPOSER</span> Post Copy
+          </label>
+          {maxCharLimit !== Infinity && (
+            <span className={`character-counter-badge ${isOverLimit ? 'error' : isCloseToLimit ? 'warning' : ''}`}>
+              {charCount} / {maxCharLimit.toLocaleString()} chars
+            </span>
+          )}
+        </div>
+        
+        {/* Dynamic Character Progress Bar */}
+        {maxCharLimit !== Infinity && (
+          <div className="char-progress-track">
+            <div
+              className={`char-progress-bar ${isOverLimit ? 'over' : isCloseToLimit ? 'near' : ''}`}
+              style={{ width: `${Math.min(100, (charCount / maxCharLimit) * 100)}%` }}
+            />
+          </div>
+        )}
+
+        <div className="textarea-container" style={{ marginTop: '0.35rem' }}>
           <textarea
             id="post-body"
             className="form-input form-textarea"
             placeholder="Type your message here... Make sure it complies with the targeted platforms!"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            rows={5}
           />
-          {maxCharLimit !== Infinity && (
-            <span className={`character-counter ${isOverLimit ? 'error' : isCloseToLimit ? 'warning' : ''}`}>
-              {charCount} / {maxCharLimit.toLocaleString()}
-            </span>
-          )}
         </div>
       </div>
 
-      {/* Hashtag Suggestions */}
+      {/* Quick Templates & Hashtags */}
       <div className="form-group">
-        <label className="form-label">Quick Hashtags</label>
+        <label className="form-label">
+          <span className="section-badge-tag">⚡ QUICK HASHTAGS</span> Tap to Add
+        </label>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {hashtags.map((tag) => (
             <button
               key={tag}
               type="button"
-              className="btn-secondary"
-              style={{ padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.2rem', cursor: 'pointer' }}
+              className="hashtag-pill-btn"
               onClick={() => appendHashtag(tag)}
             >
-              <Hash size={12} />
+              <Hash size={13} />
               {tag.slice(1)}
             </button>
           ))}
@@ -140,15 +159,16 @@ function Editor({
 
       {/* Media Uploader Box */}
       <div className="form-group">
-        <label className="form-label">Post Media</label>
+        <label className="form-label">
+          <span className="section-badge-tag">🖼️ MEDIA ATTACHMENTS</span> Add Sample Assets
+        </label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             {sampleImages.map((img) => (
               <button
                 key={img.name}
                 type="button"
-                className="btn-secondary"
-                style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}
+                className="media-preset-btn"
                 onClick={() => addPresetImage(img.url)}
               >
                 <ImageIcon size={14} />

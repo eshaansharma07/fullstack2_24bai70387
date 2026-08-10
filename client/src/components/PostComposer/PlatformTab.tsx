@@ -24,7 +24,9 @@ const platforms: PlatformOption[] = [
 function PlatformTab({ selectedPlatforms, togglePlatform }: PlatformTabProps) {
   return (
     <div className="form-group">
-      <label className="form-label">Target Social Platforms</label>
+      <label className="form-label">
+        <span className="section-badge-tag">🎯 CHANNELS</span> Target Social Platforms
+      </label>
       <div className="platform-selector">
         {platforms.map((platform) => {
           const Icon = platform.icon;

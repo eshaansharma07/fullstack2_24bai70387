@@ -87,7 +87,12 @@ function Preview({ content, mediaUrls, selectedPlatforms }: PreviewProps) {
 
   return (
     <div className="preview-container">
-      <h3 className="section-title">Live Preview</h3>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <h3 className="section-title" style={{ margin: 0 }}>
+          <span className="section-badge-tag">👁️ LIVE PREVIEW</span> Feed Simulator
+        </h3>
+        <span className="live-status-pill">● REAL-TIME</span>
+      </div>
       
       {/* Tabs */}
       <div className="preview-tabs">
