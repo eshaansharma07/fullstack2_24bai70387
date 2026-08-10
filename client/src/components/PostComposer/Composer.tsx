@@ -250,27 +250,16 @@ export default function Composer() {
         </div>
       )}
 
-      {/* Studio Workspace Header Banner */}
-      <div className="studio-hero-banner">
-        <div className="studio-hero-text">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <h1>Social Composer Studio</h1>
-            <span className="pro-workspace-badge">PRO WORKSPACE</span>
-          </div>
-          <p>Compose, validate, preview, and publish multi-channel content seamlessly.</p>
+      {/* Clean Page Header */}
+      <div className="composer-page-header">
+        <div>
+          <h1>Post Composer</h1>
+          <p className="composer-subtitle">Create, format, and preview content across your social channels.</p>
         </div>
-        <div className="studio-hero-stats">
-          <div className="stat-chip yellow">
-            <Save size={14} />
-            <strong>{localDrafts.length}</strong> Drafts
-          </div>
-          <div className="stat-chip mint">
-            <Database size={14} />
-            <strong>{history.length}</strong> Saved Posts
-          </div>
-          <div className="stat-chip status-live">
-            <span className="live-dot" /> Atlas DB Live
-          </div>
+        <div className="composer-quick-meta">
+          <span>💾 <strong>{localDrafts.length}</strong> Drafts</span>
+          <span className="dot-sep">•</span>
+          <span>🗄️ <strong>{history.length}</strong> Published</span>
         </div>
       </div>
 

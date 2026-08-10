@@ -107,7 +107,7 @@ function Preview({ content, mediaUrls, selectedPlatforms }: PreviewProps) {
     <div className={`preview-container ${deviceMode}`}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
         <h3 className="section-title" style={{ margin: 0 }}>
-          <span className="section-badge-tag">👁️ LIVE PREVIEW</span> Feed Simulator
+          Feed Simulator
         </h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <div className="device-toggle-bar">

@@ -126,7 +126,7 @@ function Editor({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Quick Starter Templates */}
       <div className="preset-templates-bar">
-        <span className="section-badge-tag">✨ TEMPLATES</span>
+        <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Templates:</span>
         <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', flex: 1 }}>
           {presets.map((p) => (
             <button
@@ -144,7 +144,7 @@ function Editor({
       {/* Title */}
       <div className="form-group">
         <label className="form-label" htmlFor="post-title">
-          <span className="section-badge-tag">🏷️ DRAFT TAG</span> Post Title
+          Post Title
         </label>
         <input
           id="post-title"
@@ -160,7 +160,7 @@ function Editor({
       <div className="form-group">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem' }}>
           <label className="form-label" htmlFor="post-body" style={{ margin: 0 }}>
-            <span className="section-badge-tag">✍️ COMPOSER</span> Post Copy
+            Post Copy
           </label>
           {maxCharLimit !== Infinity && (
             <span className={`character-counter-badge ${isOverLimit ? 'error' : isCloseToLimit ? 'warning' : ''}`}>
@@ -213,7 +213,7 @@ function Editor({
       {/* Platform Compliance Status Cards */}
       {selectedPlatforms.length > 0 && (
         <div className="platform-checklist-box">
-          <span className="section-badge-tag">✔ COMPLIANCE CHECK</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)' }}>Limits:</span>
           <div className="checklist-chips">
             {selectedPlatforms.map((plat) => {
               const limit = characterLimits[plat];
@@ -233,7 +233,7 @@ function Editor({
       {/* Quick Templates & Hashtags */}
       <div className="form-group">
         <label className="form-label">
-          <span className="section-badge-tag">⚡ HASHTAG GENERATOR</span> Tap to Append
+          Hashtags
         </label>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {hashtags.map((tag) => (
@@ -253,7 +253,7 @@ function Editor({
       {/* Media Uploader Box */}
       <div className="form-group">
         <label className="form-label">
-          <span className="section-badge-tag">🖼️ MEDIA GALLERY</span> Sample Asset Presets
+          Media Attachments
         </label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>

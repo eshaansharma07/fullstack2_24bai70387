@@ -404,6 +404,51 @@ button:disabled {
   text-transform: uppercase;
 }
 
+/* ── Sleek Spacious Page Header ── */
+.composer-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 3px solid var(--border);
+  box-shadow: 4px 4px 0 var(--border);
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.composer-page-header h1 {
+  font-size: 1.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--text-main);
+  margin-bottom: 0.15rem;
+}
+
+.composer-subtitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.composer-quick-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-main);
+  background: var(--bg-muted);
+  padding: 0.45rem 0.85rem;
+  border: 2px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+.dot-sep {
+  color: var(--border-soft);
+}
+
 .composer-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
@@ -416,8 +461,8 @@ button:disabled {
 .draft-manager-section {
   background: var(--bg-card);
   border: 3px solid var(--border);
-  padding: clamp(1rem, 2vw, 1.75rem);
-  box-shadow: var(--shadow);
+  padding: 1.75rem;
+  box-shadow: 4px 4px 0 var(--border);
 }
 
 .draft-manager-section,
