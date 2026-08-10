@@ -1788,3 +1788,181 @@ button:disabled {
     bottom: 1rem;
   }
 }
+
+/* ── Neo-Brutalist Animations Suite ── */
+
+.main-content {
+  animation: brutalPageEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes brutalPageEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered Card Entrance */
+.role-login-card,
+.permission-card,
+.quick-action-card,
+.draft-card,
+.history-card,
+.admin-user-card {
+  animation: brutalPopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+}
+
+.role-login-card:nth-child(1), .permission-card:nth-child(1), .quick-action-card:nth-child(1) { animation-delay: 0.04s; }
+.role-login-card:nth-child(2), .permission-card:nth-child(2), .quick-action-card:nth-child(2) { animation-delay: 0.08s; }
+.role-login-card:nth-child(3), .permission-card:nth-child(3), .quick-action-card:nth-child(3) { animation-delay: 0.12s; }
+.permission-card:nth-child(4) { animation-delay: 0.16s; }
+.permission-card:nth-child(5) { animation-delay: 0.20s; }
+.permission-card:nth-child(6) { animation-delay: 0.24s; }
+
+@keyframes brutalPopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Brutalist Hover Elevation with Hard Shadow Shift */
+.role-login-card:hover:not(:disabled),
+.permission-card:hover,
+.quick-action-card:hover,
+.draft-card:hover,
+.history-card:hover,
+.admin-user-card:hover {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 10px 10px 0 var(--border) !important;
+}
+
+/* Brutalist Active Press Effect */
+.btn-primary:active,
+.btn-secondary:active,
+.role-login-card:active:not(:disabled),
+.platform-tab:active,
+.hashtag-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 var(--border) !important;
+}
+
+/* Primary Button Shimmer Beam */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  transform: rotate(25deg);
+  transition: left 0.6s ease;
+}
+
+.btn-primary:hover::after {
+  left: 140%;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 10px 10px 0 var(--border) !important;
+}
+
+/* Role Badge Wiggle & Pulse */
+.role-badge {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.role-badge:hover {
+  transform: scale(1.08) rotate(-2deg);
+}
+
+.role-admin {
+  animation: adminPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes adminPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 215, 0, 0); }
+}
+
+.role-editor {
+  animation: editorPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes editorPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+}
+
+/* Navbar Logo Wiggle */
+.navbar-logo {
+  transition: transform 0.2s ease;
+}
+
+.navbar-logo:hover {
+  transform: rotate(6deg) scale(1.1);
+}
+
+/* Modal Pop Entrance */
+.modal-overlay {
+  animation: brutalBackdrop 0.2s ease-out forwards;
+}
+
+.modal-content {
+  animation: brutalModalBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes brutalBackdrop {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes brutalModalBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Toast Entrance */
+.toast {
+  animation: brutalToastSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes brutalToastSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
