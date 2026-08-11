@@ -1193,43 +1193,68 @@ button:disabled {
   margin-right: 1.25rem;
 }
 
-.navbar-logo {
+/* ── Iconic 3D Neo-Brutalist Brand Mark ── */
+
+.navbar-logo-badge {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  background: var(--accent-primary);
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   border: 3px solid var(--border);
+  color: #ffffff;
+  box-shadow: 4px 4px 0 var(--border);
+  transform: rotate(-5deg);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.navbar-logo-badge:hover {
+  transform: rotate(0deg) scale(1.12);
+  box-shadow: 6px 6px 0 var(--border);
+  background: #fef08a;
   color: var(--text-main);
+}
+
+.logo-sparkle-icon {
+  filter: drop-shadow(1px 1px 0 #000000);
+}
+
+.navbar-title-unique {
   font-family: var(--font-heading);
-  font-size: 0.9rem;
+  font-size: 1.25rem;
   font-weight: 900;
-  box-shadow: 3px 3px 0 var(--border);
-  transition: transform 0.15s ease;
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: center;
 }
 
-.navbar-logo:hover {
-  transform: rotate(-4deg) scale(1.08);
-}
-
-.navbar-title {
+.brand-text-social {
   color: var(--text-main);
-  font-family: var(--font-heading);
-  font-size: 1.15rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
-.version-badge {
-  padding: 0.1rem 0.4rem;
+.brand-text-composer {
+  color: var(--accent-dark);
+  background: #d8ffd7;
+  padding: 0.1rem 0.35rem;
+  border: 2px solid var(--border);
+  margin-left: 0.2rem;
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+.version-badge-studio {
+  padding: 0.15rem 0.45rem;
   background: #fef08a;
   color: #713f12;
   border: 2px solid var(--border);
   font-family: var(--font-heading);
   font-size: 0.65rem;
   font-weight: 900;
+  letter-spacing: 0.06em;
   box-shadow: 2px 2px 0 var(--border);
+  margin-left: 0.3rem;
 }
 
 .navbar-links {

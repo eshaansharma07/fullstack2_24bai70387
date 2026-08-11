@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { LayoutDashboard, PenSquare, Clock, Shield, LogOut, Radio, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, PenSquare, Clock, Shield, LogOut, Radio, CalendarDays, Sparkles } from 'lucide-react';
 import { logout, selectAuthUser } from '../../store/authSlice';
 import { clearComposer } from '../../store/postsSlice';
 import type { AppDispatch } from '../../store/store';
@@ -25,12 +25,15 @@ export default function AppLayout() {
       <nav className="app-navbar">
         <div className="navbar-inner">
           <div className="navbar-brand">
-            <span className="navbar-logo">SC</span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span className="navbar-title">SocialComposer</span>
-                <span className="version-badge">v2.0</span>
-              </div>
+            <div className="navbar-logo-badge" title="SocialComposer Studio">
+              <Sparkles size={20} className="logo-sparkle-icon" />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <span className="navbar-title-unique">
+                <span className="brand-text-social">Social</span>
+                <span className="brand-text-composer">Composer</span>
+              </span>
+              <span className="version-badge-studio">PRO v2.0</span>
             </div>
           </div>
 
