@@ -1193,39 +1193,70 @@ button:disabled {
   margin-right: 1.25rem;
 }
 
-/* ── Iconic 3D Neo-Brutalist Brand Mark ── */
+/* ── State-of-the-Art High Impact Sexy Brand Emblem ── */
 
-.navbar-logo-badge {
+.sexy-logo-emblem {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  background: var(--text-main);
+  border: 3px solid var(--border);
+  box-shadow: 4px 4px 0 var(--border);
+  transform: rotate(-6deg);
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+}
+
+.sexy-logo-emblem:hover {
+  transform: rotate(0deg) scale(1.15);
+  box-shadow: 6px 6px 0 var(--border);
+}
+
+.emblem-inner-box {
+  position: absolute;
+  inset: 2px;
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+  border: 2px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  border: 3px solid var(--border);
   color: #ffffff;
-  box-shadow: 4px 4px 0 var(--border);
-  transform: rotate(-5deg);
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
-  cursor: pointer;
+  overflow: hidden;
 }
 
-.navbar-logo-badge:hover {
-  transform: rotate(0deg) scale(1.12);
-  box-shadow: 6px 6px 0 var(--border);
-  background: #fef08a;
+.sexy-logo-emblem:hover .emblem-inner-box {
+  background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
   color: var(--text-main);
 }
 
-.logo-sparkle-icon {
+.logo-zap-icon {
   filter: drop-shadow(1px 1px 0 #000000);
+  transition: transform 0.2s ease;
+}
+
+.sexy-logo-emblem:hover .logo-zap-icon {
+  transform: scale(1.2) rotate(12deg);
+}
+
+.logo-spark-accent {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  color: #fef08a;
+  filter: drop-shadow(0 0 4px #22c55e);
+  animation: sparkSpin 3s linear infinite;
+}
+
+@keyframes sparkSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .navbar-title-unique {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   display: flex;
   align-items: center;
 }
@@ -1233,28 +1264,59 @@ button:disabled {
 .brand-text-social {
   color: var(--text-main);
   text-transform: uppercase;
+  position: relative;
+}
+
+.brand-text-social::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent-primary);
+  border-radius: 2px;
 }
 
 .brand-text-composer {
-  color: var(--accent-dark);
-  background: #d8ffd7;
-  padding: 0.1rem 0.35rem;
+  color: #ffffff;
+  background: var(--text-main);
+  padding: 0.15rem 0.45rem;
   border: 2px solid var(--border);
-  margin-left: 0.2rem;
-  box-shadow: 2px 2px 0 var(--border);
+  margin-left: 0.3rem;
+  box-shadow: 3px 3px 0 var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
-.version-badge-studio {
-  padding: 0.15rem 0.45rem;
+.sexy-pro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.5rem;
   background: #fef08a;
   color: #713f12;
   border: 2px solid var(--border);
   font-family: var(--font-heading);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 900;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   box-shadow: 2px 2px 0 var(--border);
-  margin-left: 0.3rem;
+  margin-left: 0.35rem;
+}
+
+.pulse-green-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  animation: dotGlow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes dotGlow {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.3); opacity: 1; }
 }
 
 .navbar-links {
