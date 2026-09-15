@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { LayoutDashboard, PenSquare, Clock, Shield, LogOut, Radio, CalendarDays, Sparkles, Zap } from 'lucide-react';
+import { LayoutDashboard, PenSquare, Clock, Shield, LogOut, Radio, CalendarDays, Sparkles, Zap, Code2 } from 'lucide-react';
 import { logout, selectAuthUser } from '../../store/authSlice';
 import { clearComposer } from '../../store/postsSlice';
 import type { AppDispatch } from '../../store/store';
@@ -56,6 +56,9 @@ export default function AppLayout() {
             </NavLink>
             <NavLink to="/calendar" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               <CalendarDays size={15} /> Calendar
+            </NavLink>
+            <NavLink to="/api-docs" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              <Code2 size={15} /> REST API
             </NavLink>
             {role === 'admin' && (
               <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>

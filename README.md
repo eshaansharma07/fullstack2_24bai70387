@@ -42,6 +42,21 @@ Objectives:
 
 COs mapped: CO1 - BT1, CO2 - BT2, CO3 - BT3.
 
+### Experiment 4: Spring Boot RESTful APIs & Layered Architecture
+
+Aim: Design and implement RESTful APIs using Spring Boot with proper validation, standardized responses, and scalable layered architecture (inspired by `amansekhon888/spring-boot-lab`).
+
+Objectives:
+
+- To understand REST API design principles and Spring Boot fundamentals.
+- To implement CRUD APIs using Spring Boot with a 4-layer architecture (`Controller`, `Service`, `Repository`, `Entity/DTO`).
+- To enforce consistent request-response structures (`ApiResponse<T>`).
+- To apply declarative validation using Jakarta Bean Validation (`@Valid`, `@NotBlank`, `@Size`, `@NotEmpty`, `@Pattern`).
+- To enable secure cross-origin communication (CORS) and OpenAPI documentation (Swagger UI).
+- To compare Node.js/Express backend paradigms with Spring Boot/Java paradigms.
+
+COs mapped: CO1 - BT1, CO3 - BT3.
+
 ## Features
 
 - Save the current composer state as a local draft.

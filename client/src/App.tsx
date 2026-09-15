@@ -12,6 +12,7 @@ import ComposePage from './components/Pages/ComposePage';
 import HistoryPage from './components/Pages/HistoryPage';
 import CalendarPage from './components/Pages/CalendarPage';
 import AdminPage from './components/Pages/AdminPage';
+import ApiDocsPage from './components/Pages/ApiDocsPage';
 
 export default function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/api-docs" element={<ApiDocsPage />} />
 
           {/* Admin + Editor only */}
           <Route element={<ProtectedRoute allowedRoles={['admin', 'editor']} />}>
