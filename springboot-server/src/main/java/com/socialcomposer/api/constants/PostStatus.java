@@ -1,4 +1,4 @@
-package com.socialcomposer.api.entity;
+package com.socialcomposer.api.constants;
 
 public enum PostStatus {
     DRAFT,

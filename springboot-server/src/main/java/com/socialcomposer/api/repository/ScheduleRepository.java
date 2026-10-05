@@ -12,4 +12,6 @@ public interface ScheduleRepository extends JpaRepository<ScheduledPost, Long> {
     List<ScheduledPost> findByOrderByScheduledDateAscScheduledTimeAsc();
 
     List<ScheduledPost> findByScheduledDateOrderByScheduledTimeAsc(String scheduledDate);
+
+    List<ScheduledPost> findByAuthorIdOrderByScheduledDateAscScheduledTimeAsc(Long authorId);
 }

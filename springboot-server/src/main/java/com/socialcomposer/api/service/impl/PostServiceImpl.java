@@ -1,15 +1,18 @@
 package com.socialcomposer.api.service.impl;
 
+import com.socialcomposer.api.constants.Platform;
+import com.socialcomposer.api.constants.PostStatus;
 import com.socialcomposer.api.dto.request.CreatePostRequest;
 import com.socialcomposer.api.dto.request.UpdatePostRequest;
 import com.socialcomposer.api.dto.request.ValidatePostRequest;
 import com.socialcomposer.api.dto.response.PostResponse;
 import com.socialcomposer.api.dto.response.ValidationResultResponse;
 import com.socialcomposer.api.entity.Post;
-import com.socialcomposer.api.entity.PostStatus;
+import com.socialcomposer.api.entity.User;
 import com.socialcomposer.api.exception.PlatformValidationException;
 import com.socialcomposer.api.exception.ResourceNotFoundException;
 import com.socialcomposer.api.repository.PostRepository;
+import com.socialcomposer.api.repository.UserRepository;
 import com.socialcomposer.api.service.PostService;
 import com.socialcomposer.api.service.ValidationService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final ValidationService validationService;
 
     @Override
@@ -43,6 +47,19 @@ public class PostServiceImpl implements PostService {
             throw new PlatformValidationException("Post validation failed for one or more selected platforms.", validation);
         }
 
+        // Resolve author entity for foreign key relationship
+        User author = null;
+        if (request.getUserId() != null) {
+            author = userRepository.findById(request.getUserId()).orElse(null);
+        } else if (request.getUserEmail() != null && !request.getUserEmail().isBlank()) {
+            author = userRepository.findByEmail(request.getUserEmail().trim().toLowerCase()).orElse(null);
+        }
+
+        if (author == null) {
+            // Default to first available user (e.g. admin) if none specified
+            author = userRepository.findAll().stream().findFirst().orElse(null);
+        }
+
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
@@ -50,6 +67,7 @@ public class PostServiceImpl implements PostService {
                 .mediaUrls(request.getMediaUrls() != null ? request.getMediaUrls() : new ArrayList<>())
                 .platforms(request.getPlatforms())
                 .status(PostStatus.PUBLISHED)
+                .author(author)
                 .build();
 
         Post savedPost = postRepository.save(post);

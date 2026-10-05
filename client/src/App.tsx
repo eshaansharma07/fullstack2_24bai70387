@@ -31,13 +31,7 @@ export default function App() {
       <Route
         path="/login"
         element={
-          isAuthenticated ? <Navigate to="/" replace /> : (
-            <div className="app-container">
-              <main className="main-content">
-                <AuthPanel />
-              </main>
-            </div>
-          )
+          isAuthenticated ? <Navigate to="/" replace /> : <AuthPanel />
         }
       />
 

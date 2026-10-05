@@ -1,10 +1,10 @@
 package com.socialcomposer.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.socialcomposer.api.constants.Platform;
+import com.socialcomposer.api.constants.PostStatus;
 import com.socialcomposer.api.dto.request.CreatePostRequest;
 import com.socialcomposer.api.dto.response.PostResponse;
-import com.socialcomposer.api.entity.Platform;
-import com.socialcomposer.api.entity.PostStatus;
 import com.socialcomposer.api.service.PostService;
 import com.socialcomposer.api.service.ValidationService;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +51,7 @@ class PostControllerTest {
                 .mediaCount(0)
                 .platforms(Set.of(Platform.TWITTER, Platform.LINKEDIN))
                 .status(PostStatus.PUBLISHED)
+                .authorName("Admin User")
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -80,6 +81,7 @@ class PostControllerTest {
                 .mediaCount(1)
                 .platforms(request.getPlatforms())
                 .status(PostStatus.PUBLISHED)
+                .authorName("Admin User")
                 .createdAt(LocalDateTime.now())
                 .build();
 

@@ -1,12 +1,14 @@
 package com.socialcomposer.api.service;
 
+import com.socialcomposer.api.constants.Platform;
 import com.socialcomposer.api.dto.request.CreatePostRequest;
 import com.socialcomposer.api.dto.response.PostResponse;
 import com.socialcomposer.api.dto.response.ValidationResultResponse;
-import com.socialcomposer.api.entity.Platform;
 import com.socialcomposer.api.entity.Post;
+import com.socialcomposer.api.entity.User;
 import com.socialcomposer.api.exception.PlatformValidationException;
 import com.socialcomposer.api.repository.PostRepository;
+import com.socialcomposer.api.repository.UserRepository;
 import com.socialcomposer.api.service.impl.PostServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,8 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +31,9 @@ class PostServiceTest {
 
     @Mock
     private PostRepository postRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private ValidationService validationService;
@@ -44,7 +49,11 @@ class PostServiceTest {
                 .content("Spring Boot 3.2 is awesome!")
                 .mediaCount(0)
                 .platforms(Set.of(Platform.TWITTER))
+                .userId(1L)
                 .build();
+
+        User author = User.builder().id(1L).name("Admin User").email("admin@social.com").build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(author));
 
         when(validationService.validatePost(any())).thenReturn(
                 ValidationResultResponse.builder()
@@ -58,6 +67,7 @@ class PostServiceTest {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .platforms(request.getPlatforms())
+                .author(author)
                 .build();
 
         when(postRepository.save(any(Post.class))).thenReturn(savedPost);
@@ -67,6 +77,7 @@ class PostServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getId()).isEqualTo(1L);
         assertThat(response.getTitle()).isEqualTo("Spring Boot Release");
+        assertThat(response.getAuthorName()).isEqualTo("Admin User");
         verify(postRepository, times(1)).save(any(Post.class));
     }
 

@@ -1,6 +1,6 @@
 package com.socialcomposer.api.dto.request;
 
-import com.socialcomposer.api.entity.Platform;
+import com.socialcomposer.api.constants.Platform;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -38,4 +38,7 @@ public class CreateScheduleRequest {
     @NotBlank(message = "Scheduled time is required.")
     @Pattern(regexp = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$", message = "Scheduled time must be in 24-hour HH:mm format (e.g. 14:30).")
     private String scheduledTime;
+
+    private Long userId;
+    private String userEmail;
 }

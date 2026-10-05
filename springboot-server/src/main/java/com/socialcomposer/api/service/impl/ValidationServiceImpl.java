@@ -1,9 +1,9 @@
 package com.socialcomposer.api.service.impl;
 
+import com.socialcomposer.api.constants.Platform;
 import com.socialcomposer.api.dto.request.ValidatePostRequest;
 import com.socialcomposer.api.dto.response.ValidationResultResponse;
 import com.socialcomposer.api.dto.response.ValidationResultResponse.PlatformValidationDetail;
-import com.socialcomposer.api.entity.Platform;
 import com.socialcomposer.api.service.ValidationService;
 import org.springframework.stereotype.Service;
 

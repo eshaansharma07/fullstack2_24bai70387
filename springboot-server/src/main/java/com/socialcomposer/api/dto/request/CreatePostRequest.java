@@ -1,6 +1,6 @@
 package com.socialcomposer.api.dto.request;
 
-import com.socialcomposer.api.entity.Platform;
+import com.socialcomposer.api.constants.Platform;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -31,4 +31,10 @@ public class CreatePostRequest {
 
     @NotEmpty(message = "At least one social platform (twitter, facebook, instagram, linkedin) must be selected.")
     private Set<Platform> platforms;
+
+    /**
+     * Optional ID or email of user creating the post for multi-user author tracking.
+     */
+    private Long userId;
+    private String userEmail;
 }

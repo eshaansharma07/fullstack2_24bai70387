@@ -1,4 +1,4 @@
-package com.socialcomposer.api.entity;
+package com.socialcomposer.api.constants;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

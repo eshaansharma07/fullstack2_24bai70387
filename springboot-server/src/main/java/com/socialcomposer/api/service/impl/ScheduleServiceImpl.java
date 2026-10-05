@@ -1,12 +1,14 @@
 package com.socialcomposer.api.service.impl;
 
+import com.socialcomposer.api.constants.PostStatus;
 import com.socialcomposer.api.dto.request.CreateScheduleRequest;
 import com.socialcomposer.api.dto.request.UpdateScheduleRequest;
 import com.socialcomposer.api.dto.response.ScheduleResponse;
-import com.socialcomposer.api.entity.PostStatus;
 import com.socialcomposer.api.entity.ScheduledPost;
+import com.socialcomposer.api.entity.User;
 import com.socialcomposer.api.exception.ResourceNotFoundException;
 import com.socialcomposer.api.repository.ScheduleRepository;
+import com.socialcomposer.api.repository.UserRepository;
 import com.socialcomposer.api.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,10 +23,22 @@ import java.util.stream.Collectors;
 public class ScheduleServiceImpl implements ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
     public ScheduleResponse createSchedule(CreateScheduleRequest request) {
+        User author = null;
+        if (request.getUserId() != null) {
+            author = userRepository.findById(request.getUserId()).orElse(null);
+        } else if (request.getUserEmail() != null && !request.getUserEmail().isBlank()) {
+            author = userRepository.findByEmail(request.getUserEmail().trim().toLowerCase()).orElse(null);
+        }
+
+        if (author == null) {
+            author = userRepository.findAll().stream().findFirst().orElse(null);
+        }
+
         ScheduledPost post = ScheduledPost.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
@@ -33,6 +47,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .scheduledDate(request.getScheduledDate())
                 .scheduledTime(request.getScheduledTime())
                 .status(PostStatus.SCHEDULED)
+                .author(author)
                 .build();
 
         ScheduledPost saved = scheduleRepository.save(post);

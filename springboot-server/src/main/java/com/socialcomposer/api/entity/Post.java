@@ -1,5 +1,7 @@
 package com.socialcomposer.api.entity;
 
+import com.socialcomposer.api.constants.Platform;
+import com.socialcomposer.api.constants.PostStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -51,6 +53,14 @@ public class Post {
     @Column(nullable = false)
     @Builder.Default
     private PostStatus status = PostStatus.PUBLISHED;
+
+    /**
+     * Foreign key constraint linking the post to its creator/author.
+     * Maps to column `user_id` referencing `users(id)`.
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private User author;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

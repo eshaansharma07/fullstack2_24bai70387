@@ -1,7 +1,7 @@
 package com.socialcomposer.api.dto.response;
 
-import com.socialcomposer.api.entity.Platform;
-import com.socialcomposer.api.entity.PostStatus;
+import com.socialcomposer.api.constants.Platform;
+import com.socialcomposer.api.constants.PostStatus;
 import com.socialcomposer.api.entity.ScheduledPost;
 import lombok.*;
 
@@ -24,6 +24,13 @@ public class ScheduleResponse {
     private String scheduledDate;
     private String scheduledTime;
     private PostStatus status;
+
+    // Foreign key author details
+    private Long authorId;
+    private String authorName;
+    private String authorEmail;
+    private String authorRole;
+
     private LocalDateTime createdAt;
 
     public static ScheduleResponse fromEntity(ScheduledPost post) {
@@ -37,6 +44,10 @@ public class ScheduleResponse {
                 .scheduledDate(post.getScheduledDate())
                 .scheduledTime(post.getScheduledTime())
                 .status(post.getStatus())
+                .authorId(post.getAuthor() != null ? post.getAuthor().getId() : null)
+                .authorName(post.getAuthor() != null ? post.getAuthor().getName() : "Anonymous")
+                .authorEmail(post.getAuthor() != null ? post.getAuthor().getEmail() : null)
+                .authorRole(post.getAuthor() != null && post.getAuthor().getRole() != null ? post.getAuthor().getRole().name() : null)
                 .createdAt(post.getCreatedAt())
                 .build();
     }

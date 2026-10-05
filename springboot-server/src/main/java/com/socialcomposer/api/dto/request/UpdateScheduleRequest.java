@@ -1,6 +1,6 @@
 package com.socialcomposer.api.dto.request;
 
-import com.socialcomposer.api.entity.Platform;
+import com.socialcomposer.api.constants.Platform;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
