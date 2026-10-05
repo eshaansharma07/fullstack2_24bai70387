@@ -1,0 +1,514 @@
+/* ─────────────────────────────────────────────────────────────
+   MODERN SAAS SHELL: LEFT SIDEBAR + TOP HEADER + MAIN CONTENT
+   Palette: Emerald #12A765, Mint #E7F8F0, Charcoal #101817, Bg #F7FAF8
+───────────────────────────────────────────────────────────── */
+
+.saas-layout-shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f7faf8;
+  color: #101817;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+}
+
+/* ── LEFT SIDEBAR (Desktop: ~260px) ── */
+.saas-sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: #ffffff;
+  border-right: 1px solid #dfe8e3;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow-y: auto;
+}
+
+.saas-sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem 1.15rem 1.25rem;
+}
+
+/* Sidebar Logo */
+.saas-sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  margin-bottom: 2rem;
+  padding: 0 0.35rem;
+}
+
+.saas-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.saas-logo-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #12a765;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(18, 167, 101, 0.25);
+  flex-shrink: 0;
+}
+
+.saas-brand-text-col {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.saas-brand-title-black {
+  font-size: 0.88rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  color: #101817;
+  text-transform: uppercase;
+}
+
+.saas-brand-title-green {
+  font-size: 0.88rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  color: #12a765;
+  text-transform: uppercase;
+}
+
+.saas-brand-pro-badge {
+  background: #fef08a;
+  color: #713f12;
+  border: 1px solid #fde047;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  line-height: 1.2;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* Navigation List */
+.saas-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.75rem;
+}
+
+.saas-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+  color: #4b5752;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.saas-nav-link:hover {
+  background: #f3fbf7;
+  color: #12a765;
+}
+
+.saas-nav-link.active {
+  background: #e7f8f0;
+  color: #12a765;
+  font-weight: 700;
+}
+
+.saas-nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3.5px;
+  background: #12a765;
+  border-radius: 0 4px 4px 0;
+}
+
+.saas-nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+/* Quick Create Button */
+.saas-quick-create-section {
+  margin-bottom: 1.75rem;
+}
+
+.saas-quick-create-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #8c9b94;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.55rem;
+  padding-left: 0.35rem;
+}
+
+.saas-compose-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  background: #12a765;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(18, 167, 101, 0.28);
+  transition: all 0.18s ease;
+}
+
+.saas-compose-btn:hover {
+  background: #087a4b;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(18, 167, 101, 0.38);
+}
+
+/* Promotional Abstract Card */
+.saas-sidebar-promo-card {
+  margin-top: auto;
+  margin-bottom: 1.5rem;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f3fbf7 0%, #e7f8f0 100%);
+  border: 1px solid #d4ece0;
+  padding: 1.15rem 1rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.saas-promo-illu {
+  width: 100%;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.saas-promo-heading {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #101817;
+  line-height: 1.25;
+  margin-bottom: 0.35rem;
+}
+
+.saas-promo-sub {
+  font-size: 0.75rem;
+  color: #66736e;
+  line-height: 1.4;
+}
+
+/* User Area at bottom */
+.saas-sidebar-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid #dfe8e3;
+}
+
+.saas-user-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.saas-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e7f8f0;
+  color: #12a765;
+  font-weight: 800;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c8ecd9;
+}
+
+.saas-user-texts {
+  display: flex;
+  flex-direction: column;
+}
+
+.saas-user-name {
+  font-size: 0.84rem;
+  font-weight: 750;
+  color: #101817;
+  line-height: 1.15;
+}
+
+.saas-role-badge-yellow {
+  display: inline-block;
+  width: fit-content;
+  background: #fef08a;
+  color: #713f12;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-top: 0.15rem;
+  letter-spacing: 0.04em;
+}
+
+.saas-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #66736e;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.saas-logout-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+/* ── RIGHT MAIN WORKSPACE ── */
+.saas-main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #f7faf8;
+}
+
+/* Top Header */
+.saas-top-header {
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #dfe8e3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(1.25rem, 3vw, 2.5rem);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+/* Mobile Toggle */
+.saas-mobile-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #f3fbf7;
+  border: 1px solid #dfe8e3;
+  border-radius: 8px;
+  color: #101817;
+  cursor: pointer;
+  margin-right: 0.75rem;
+}
+
+/* Top Search Bar */
+.saas-header-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(100%, 360px);
+}
+
+.saas-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: #8c9b94;
+  pointer-events: none;
+}
+
+.saas-search-input {
+  width: 100%;
+  height: 38px;
+  background: #f7faf8;
+  border: 1px solid #dfe8e3;
+  border-radius: 9px;
+  padding: 0 2.5rem 0 2.35rem;
+  font-size: 0.86rem;
+  color: #101817;
+  outline: none;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.saas-search-input:focus {
+  background: #ffffff;
+  border-color: #12a765;
+  box-shadow: 0 0 0 3px rgba(18, 167, 101, 0.12);
+}
+
+.saas-search-input::placeholder {
+  color: #8c9b94;
+}
+
+.saas-shortcut-chip {
+  position: absolute;
+  right: 0.65rem;
+  background: #ffffff;
+  border: 1px solid #d4ddd7;
+  border-radius: 5px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #8c9b94;
+  pointer-events: none;
+}
+
+/* Top Right Indicators */
+.saas-header-right-tools {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+}
+
+.saas-online-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #12a765;
+  background: #e7f8f0;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  border: 1px solid #c8ecd9;
+}
+
+.saas-online-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #12a765;
+  box-shadow: 0 0 0 2px rgba(18, 167, 101, 0.2);
+}
+
+.saas-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: transparent;
+  border: 1px solid #dfe8e3;
+  color: #4b5752;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.saas-icon-btn:hover {
+  background: #f3fbf7;
+  color: #12a765;
+  border-color: #c8ecd9;
+}
+
+.saas-notif-dot {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #12a765;
+}
+
+.saas-header-user-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e7f8f0;
+  color: #12a765;
+  font-weight: 800;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #12a765;
+}
+
+/* Main Outlet Content Container */
+.saas-content-area {
+  flex: 1;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ── Mobile Drawer Overlay ── */
+.saas-mobile-backdrop {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .saas-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .saas-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .saas-mobile-toggle {
+    display: flex;
+  }
+
+  .saas-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 24, 23, 0.45);
+    z-index: 95;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .saas-mobile-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
